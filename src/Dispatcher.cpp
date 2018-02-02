@@ -18,8 +18,9 @@
 Dispatcher* Dispatcher::instance = NULL;
 
 Dispatcher::Dispatcher() {
-    this->actuators = std::unordered_map<int, std::vector<Actuator*> >();
-    this->printers = std::unordered_map<int, std::vector<Printer*> >();
+    this->actuators = std::unordered_map<Event, std::vector<Actuator*> >(16);
+    this->printers = std::unordered_map<Event, std::vector<Printer*> >(16);
+    this->middleware = std::unordered_map<Event, Middleware*>(16);
 }
 
 Dispatcher* Dispatcher::createInstance() {
@@ -33,21 +34,21 @@ Dispatcher* Dispatcher::createInstance() {
  * Subscribe methods for actuators, printers and middleware
  */
 
-void Dispatcher::subscribeActuator(int event, Actuator* actuator) {
+void Dispatcher::subscribe(int event, Actuator* actuator) {
     if (this->actuators.find(event) == this->actuators.end()) {
-        this->actuators[event] = std::vector<Actuator*>();
+        this->actuators[event] = std::vector<Actuator*>(5);
     }
     this->actuators[event].push_back(actuator);
 }
 
-void Dispatcher::subscribePrinter(int event, Printer* printer) {
+void Dispatcher::subscribe(int event, Printer* printer) {
     if (this->printers.find(event) == this->printers.end()) {
-        this->printers[event] = std::vector<Printer*>();
+        this->printers[event] = std::vector<Printer*>(5);
     }
     this->printers[event].push_back(printer);
 }
 
-void Dispatcher::subscribeMiddleware(int event, Middleware* middleware) {
+void Dispatcher::subscribe(int event, Middleware* middleware) {
     this->middleware[event] = middleware;
 }
 
@@ -56,44 +57,23 @@ void Dispatcher::subscribeMiddleware(int event, Middleware* middleware) {
  * Dispatch methods
  */
 
-void Dispatcher::dispatchData(int event, void* data) {
+void Dispatcher::dispatch(void* eventStruct) {
+    event_t eventData = *((event_t*)eventStruct);
+    Dispatcher::instance->dispatch(eventData.event, eventData.data);
+}
+
+void Dispatcher::dispatch(Event event, void* data) {
     if (this->middleware.find(event) != this->middleware.end()) {
         data = this->middleware[event].execute(event, data);
     }
     if (this->printers.find(event) != this->printers.end()) {
         for (int i = 0; i < this->printers[event].size(); ++i) {
-            this->printers[event][i]->printData(event, data);
+            this->printers[event][i]->print(event, data);
         }
     }
     if (this->actuators.find(event) != this->actuators.end()) {
         for (int i = 0; i < this->actuators[event].size(); ++i) {
-            this->actuators[event][i]->actuateData(event, data);
-        }
-    }
-}
-
-void Dispatcher::dispatchNotification(int event) {
-    if (this->printers.find(event) != this->printers.end()) {
-        for (int i = 0; i < this->printers[event].size(); ++i) {
-            this->printers[event][i]->printNotification(event);
-        }
-    }
-    if (this->actuators.find(event) != this->actuators.end()) {
-        for (int i = 0; i < this->actuators[event].size(); ++i) {
-            this->actuators[event][i]->actuateData(event);
-        }
-    }
-}
-
-void Dispatcher::dispatchError(int event) {
-    if (this->printers.find(event) != this->printers.end()) {
-        for (int i = 0; i < this->printers[event].size(); ++i) {
-            this->printers[event][i]->printError(event);
-        }
-    }
-    if (this->actuators.find(event) != this->actuators.end()) {
-        for (int i = 0; i < this->actuators[event].size(); ++i) {
-            this->actuators[event][i]->actuateError(event);
+            this->actuators[event][i]->actuate(event, data);
         }
     }
 }
