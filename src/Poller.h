@@ -51,8 +51,7 @@ private:
     static void onGyroscopeRead(sensor_data_t* data, error_t error);
     static void onBarometerRead(sensor_data_t* data, error_t error);
 
-    void dispatchData(int event, void* data);
-    void dispatchError(int event);
+    void dispatch(Event event, void* data);
 
     void readSensors();
 

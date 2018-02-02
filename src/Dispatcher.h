@@ -33,9 +33,11 @@ private:
      * At the moment, just one Middleware per event is allowed.
      */
 
-    std::unordered_map<int event, std::vector<Actuator*>> actuators;
-    std::unordered_map<int event, std::vector<Printer*>> printers;
-    std::unordered_map<int event, Middleware*> middleware;
+    std::unordered_map<Event event, std::vector<Actuator*>> actuators;
+    std::unordered_map<Event event, std::vector<Printer*>> printers;
+    std::unordered_map<Event event, Middleware*> middleware;
+
+    void dispatch(Event event, void* data);
 
     Dispatcher();
 
@@ -47,13 +49,11 @@ public:
      * Events are defined in the events.h file
      */
 
-    void subscribeActuator(int event, Actuator* actuator);
-    void subscribePrinter(int event, Printer* printer);
-    void subscribeMiddleware(int event, Middleware* middleware);
+    void subscribe(Event event, Actuator* actuator);
+    void subscribe(Event event, Printer* printer);
+    void subscribe(Event event, Middleware* middleware);
 
-    void dispatchData(int event, void* data);
-    void dispatchNotification(int event);
-    void dispatchError(int event);
+    static void dispatch(void* eventStruct);
 
 };
 

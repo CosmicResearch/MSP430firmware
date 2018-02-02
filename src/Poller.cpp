@@ -39,34 +39,41 @@ error_t Poller::start() {
 
     this->dispatcher->start();
 
+    error_t res = SUCCESS;
+
     if (this->gps != NULL) {
         error_t ret = this->gps->start();
         if (ret != SUCCESS) {
-            return ret;
+            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(GPS));
+            res = ret;
         }
     }
     if (this->magne != NULL) {
         error_t ret = this->magne->start();
         if (ret != SUCCESS) {
-            return ret;
+           this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(MAGNETOMETER));
+           res = ret;
         }
     }
     if (this->accel != NULL) {
         error_t ret = this->accel->start();
         if (ret != SUCCESS) {
-            return ret;
+            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(ACCELEROMETER));
+            res = ret;
         }
     }
     if (this->gyro != NULL) {
         error_t ret = this->gyro->start();
         if (ret != SUCCESS) {
-            return ret;
+            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(GYROSCOPE));
+            res = ret;
         }
     }
     if (this->bar != NULL) {
         error_t ret = this->bar->start();
         if (ret != SUCCESS) {
-            return ret;
+            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(BAROMETER));
+            res = ret;
         }
     }
 
@@ -79,14 +86,8 @@ error_t Poller::start() {
     this->timer->attachCallback(tick);
     this->timer->startPeriodic(this->interval);
 
-#ifdef DEBUG
-
-    Debug.begin();
-
-#endif
-
     this->started = true;
-    return SUCCESS;
+    return res;
 }
 
 void Poller::tick() {
@@ -132,29 +133,28 @@ void Poller::attachMagnetometer(Magnetometer* magne) {
 }
 
 void Poller::onGPSRead(sensor_data_t* data, error_t error) {
-    Poller::instance->dispatchData(EVENT_READ_GPS, data);
+    Poller::instance->dispatch(EVENT_READ_GPS, data);
 }
 
 void Poller::onAccelerometerRead(sensor_data_t* data, error_t error) {
-    Poller::instance->dispatchData(EVENT_READ_ACCELEROMETER, data);
+    Poller::instance->dispatch(EVENT_READ_ACCELEROMETER, data);
 }
 
 void Poller::onBarometerRead(sensor_data_t* data, error_t error) {
-
+    Poller::instance->dispatch(EVENT_READ_BAROMETER, data);
 }
 
 void Poller::onGyroscopeRead(sensor_data_t* data, error_t error) {
-
+    Poller::instance->dispatch(EVENT_READ_GYROSCOPE, data);
 }
 
 void Poller::onMagnetometerRead(sensor_data_t* data, error_t error) {
-
+    Poller::instance->dispatch(EVENT_READ_MAGNETOMETER, data);
 }
 
-void Poller::dispatchData(int event, void* data) {
-    this->dispatcher->dispatchData(event, data);
-}
-
-void Poller::dispatchError(int event) {
-    this->dispatcher->dispatchError(event);
+void Poller::dispatch(Event event, void* data) {
+    event_t* eventData = new event_t;
+    event_t->event = event;
+    event_t->data = data;
+    postTask(this->dispatcher->dispatch, (void*)eventData);
 }
