@@ -83,6 +83,12 @@ error_t Poller::start() {
     this->gyro->attachReadDone(onGyroscopeRead);
     this->bar->attachReadDone(onBarometerRead);
 
+    this->gps->attachStartDone(onGPSStartDone);
+    this->magne->attachStartDone(onMagnetometerStartDone);
+    this->accel->attachStartDone(onAccelerometerStartDone);
+    this->gyro->attachStartDone(onGyroscopeStartDone);
+    this->bar->attachStartDone(onBarometerStartDone);
+
     this->timer->attachCallback(tick);
     this->timer->startPeriodic(this->interval);
 
@@ -150,6 +156,51 @@ void Poller::onGyroscopeRead(sensor_data_t* data, error_t error) {
 
 void Poller::onMagnetometerRead(sensor_data_t* data, error_t error) {
     Poller::instance->dispatch(EVENT_READ_MAGNETOMETER, data);
+}
+
+void Poller::onGPSStartDone(error_t error) {
+    if (error == SUCCESS) {
+        Poller::instance->dispatch(EVENT_SENSOR_INIT, new int(GPS));
+    }
+    else {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new int(GPS));
+    }
+}
+
+void Poller::onAccelerometerStartDone(error_t error) {
+    if (error == SUCCESS) {
+        Poller::instance->dispatch(EVENT_SENSOR_INIT, new int(ACCELEROMETER));
+    }
+    else {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new int(ACCELEROMETER));
+    }
+}
+
+void Poller::onGyroscopeStartDone(error_t error) {
+    if (error == SUCCESS) {
+        Poller::instance->dispatch(EVENT_SENSOR_INIT, new int(GYROSCOPE));
+    }
+    else {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new int(GYROSCOPE));
+    }
+}
+
+void Poller::onMagnetometerStartDone(error_t error) {
+    if (error == SUCCESS) {
+        Poller::instance->dispatch(EVENT_SENSOR_INIT, new int(MAGNETOMETER));
+    }
+    else {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new int(MAGNETOMETER));
+    }
+}
+
+void Poller::onBarometerStartDone(error_t error) {
+    if (error == SUCCESS) {
+        Poller::instance->dispatch(EVENT_SENSOR_INIT, new int(BAROMETER));
+    }
+    else {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new int(BAROMETER));
+    }
 }
 
 void Poller::dispatch(Event event, void* data) {

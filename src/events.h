@@ -53,6 +53,7 @@ struct {
 #define EVENT_APOGEE  16
 #define EVENT_MAIN_FIRED 17
 #define EVENT_DROGUE_FIRED 18
+#define EVENT_SENSOR_INIT 19
 
 /**
  * ERRORS < 0

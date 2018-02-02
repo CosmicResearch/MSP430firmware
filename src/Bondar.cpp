@@ -13,10 +13,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Poller.h"
+#include "Dispatcher.h"
+
+Poller* poller;
+Dispatcher* dispatcher;
+
 void setup(void) {
-
+    dispatcher = Dispatcher::createInstance();
+    //TODO: subscribe actuators and printers to the dispatcher
+    poller = Poller::createInstance(dispatcher, 100);
+    //TODO: attach sensors to the poller
+    poller->start();
 }
 
-void loop(void) {
-    
-}
+// Nothing to do here (づ◔ ͜ʖ◔)づ
+void loop(void) {}

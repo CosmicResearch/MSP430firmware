@@ -51,6 +51,12 @@ private:
     static void onGyroscopeRead(sensor_data_t* data, error_t error);
     static void onBarometerRead(sensor_data_t* data, error_t error);
 
+    static void onGPSStartDone(error_t error);
+    static void onAccelerometerStartDone(error_t error);
+    static void onMagnetometerStartDone(error_t error);
+    static void onGyroscopeStartDone(error_t error);
+    static void onBarometerStartDone(error_t error);
+
     void dispatch(Event event, void* data);
 
     void readSensors();
