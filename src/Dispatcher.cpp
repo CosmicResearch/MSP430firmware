@@ -21,6 +21,7 @@ Dispatcher::Dispatcher() {
     this->actuators = std::unordered_map<Event, std::vector<Actuator*> >(16);
     this->printers = std::unordered_map<Event, std::vector<Printer*> >(16);
     this->middleware = std::unordered_map<Event, Middleware*>(16);
+    this->started = false;
 }
 
 Dispatcher* Dispatcher::createInstance() {
@@ -31,25 +32,78 @@ Dispatcher* Dispatcher::createInstance() {
 }
 
 /**
+ * Starts every Actuator, Printer and Middleware subscribed
+ * If any of them returns ERROR, it is deleted and a EVENT_ERROR is dispatched
+ */
+
+error_t Dispatcher::start() {
+
+    if (this->started) {
+        return ERROR;
+    }
+
+    error_t res = SUCCESS;
+
+    std::vector<event_t> errors_to_dispatch(5);
+
+    for (std::pair<Event, std::vector<Actuator*> > pair_vector_actuators : this->actuators) {
+        for (int i = 0; i < vector_actuators.second.size(); ++i) {
+            error_t ret = pair_vector_actuators.second[i]->start();
+            if (ret != SUCCESS) {
+                errors_to_dispatch.push_back({EVENT_ERROR_ACTUATOR_INIT, pair_vector_actuators.second[i]});
+                pair_vector_actuators.second.erase(pair_vector_actuators.second.begin() + i);
+            }
+        }
+    }
+    for (std::pair<Event, std::vector<Printer*> > pair_vector_printers : this->printers) {
+        for (int i = 0; i < pair_vector_printers.second.size(); ++i) {
+            error_t ret = pair_vector_printers.second[i]->start();
+            if (ret != SUCCESS) {
+                errors_to_dispatch.push_back({EVENT_ERROR_PRINTER_INIT, pair_vector_printers.second[i]});
+                pair_vector_printers.second.erase(pair_vector_printers.second.begin() + i);
+            }
+        }
+    }
+    for (std::pair<Event, Middleware*> pair_middleware : this->middleware) {
+        error_t ret = pair_middleware.second->start();
+        if (ret != SUCCESS) {
+            errors_to_dispatch.push_back({EVENT_ERROR_MIDDLEWARE_INIT, pair_middleware.second});
+            this->middleware.erase(pair_middleware.first);
+        }
+    }
+    
+    this->started = true;
+
+    for (int i = 0; i < errors_to_dispatch.size(); ++i) {
+        this->dispatch(errors_to_dispatch[i].event, errors_to_dispatch[i].data);
+    }
+
+    return res;
+}
+
+/**
  * Subscribe methods for actuators, printers and middleware
  */
 
-void Dispatcher::subscribe(int event, Actuator* actuator) {
+void Dispatcher::subscribe(Event event, Actuator* actuator) {
     if (this->actuators.find(event) == this->actuators.end()) {
         this->actuators[event] = std::vector<Actuator*>(5);
     }
     this->actuators[event].push_back(actuator);
+    this->started = false;
 }
 
-void Dispatcher::subscribe(int event, Printer* printer) {
+void Dispatcher::subscribe(Event event, Printer* printer) {
     if (this->printers.find(event) == this->printers.end()) {
         this->printers[event] = std::vector<Printer*>(5);
     }
     this->printers[event].push_back(printer);
+    this->started = false;
 }
 
-void Dispatcher::subscribe(int event, Middleware* middleware) {
+void Dispatcher::subscribe(Event event, Middleware* middleware) {
     this->middleware[event] = middleware;
+    this->started = false;
 }
 
 
@@ -58,11 +112,17 @@ void Dispatcher::subscribe(int event, Middleware* middleware) {
  */
 
 void Dispatcher::dispatch(void* eventStruct) {
+    if (!this->started) {
+        return;
+    }
     event_t eventData = *((event_t*)eventStruct);
     Dispatcher::instance->dispatch(eventData.event, eventData.data);
 }
 
 void Dispatcher::dispatch(Event event, void* data) {
+    if (!this->started) {
+        return;
+    }
     if (this->middleware.find(event) != this->middleware.end()) {
         data = this->middleware[event].execute(event, data);
     }

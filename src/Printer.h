@@ -17,11 +17,28 @@
 #define BONDAR_PRINTER
 
 #include "events.h"
+#include "Senscape.h"
 
 class Printer {
 
+    /**
+     * 
+     * Printers print data to the SD card, Serial port or sends it through the radio link.
+     * 
+     */
+
 public:
 
+    /**
+     * Any *expensive* operation should be done here and not in the constructor
+     * Returns: SUCCESS if it has been started or any error defined in error.h otherwise
+    */
+    virtual error_t start() = 0;
+
+    /**
+     * event: one of the event codes defined in events.h
+     * data: pointer to data about the event or NULL
+    */ 
     virtual void print(Event event, void* data) = 0;
 
 };

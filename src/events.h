@@ -23,10 +23,10 @@ typedef int8_t Event;
 
 // postTask() only allows 1 parameter, this struct was created to circumvent this limitation
 
-struct {
-    Event event,
-    void* data
-} event_t;
+struct event_t {
+    Event event;
+    void* data;
+};
 
 #define EVENT_UNDEFINED 0
 
@@ -61,6 +61,9 @@ struct {
 
 #define EVENT_ERROR -1
 #define EVENT_ERROR_SENSOR_INIT -2
+#define EVENT_ERROR_PRINTER_INIT -3
+#define EVENT_ERROR_ACTUATOR_INIT -4
+#define EVENT_ERROR_MIDDLEWARE_INIT -5
 
 /**
  * SENSORS
