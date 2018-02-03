@@ -37,7 +37,10 @@ error_t Poller::start() {
         return ERROR;
     }
 
-    this->dispatcher->start();
+    error_t ret = this->dispatcher->start();
+    if (ret != SUCCESS) {
+        return ERROR;
+    }
 
     error_t res = SUCCESS;
 
@@ -45,35 +48,30 @@ error_t Poller::start() {
         error_t ret = this->gps->start();
         if (ret != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(GPS));
-            res = ret;
         }
     }
     if (this->magne != NULL) {
         error_t ret = this->magne->start();
         if (ret != SUCCESS) {
            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(MAGNETOMETER));
-           res = ret;
         }
     }
     if (this->accel != NULL) {
         error_t ret = this->accel->start();
         if (ret != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(ACCELEROMETER));
-            res = ret;
         }
     }
     if (this->gyro != NULL) {
         error_t ret = this->gyro->start();
         if (ret != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(GYROSCOPE));
-            res = ret;
         }
     }
     if (this->bar != NULL) {
         error_t ret = this->bar->start();
         if (ret != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(BAROMETER));
-            res = ret;
         }
     }
 
@@ -101,19 +99,19 @@ void Poller::tick() {
 }
 
 void Poller::readSensors() {
-    if (this->gps != NULL) {
+    if (this->gps != NULL && this->gps->isStarted()) {
         this->gps->read();
     }
-    if (this->accel != NULL) {
+    if (this->accel != NULL && this->accel->isStarted()) {
         this->accel->read();
     }
-    if (this->magne != NULL) {
+    if (this->magne != NULL && this->magne->isStarted()) {
         this->magne->read();
     }
-    if (this->gyro != NULL) {
+    if (this->gyro != NULL && this->gyro->isStarted()) {
         this->gyro->read();
     }
-    if (this->bar != NULL) {
+    if (this->bar != NULL && this->bar->isStarted()) {
         this->bar->read();
     }
 }

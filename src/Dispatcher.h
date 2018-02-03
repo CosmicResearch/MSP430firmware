@@ -19,9 +19,10 @@
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
-#include <Actuator.h>
-#include <Printer.h>
-#include <Middleware.h>
+#include "Actuator.h"
+#include "Printer.h"
+#include "Middleware.h"
+#include "events.h"
 
 class Dispatcher {
 
@@ -41,9 +42,13 @@ private:
 
     Dispatcher();
 
+    bool started;
+
 public:
 
     static Dispatcher* createInstance();
+
+    error_t start();
 
     /**
      * Events are defined in the events.h file

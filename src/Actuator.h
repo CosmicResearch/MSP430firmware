@@ -17,11 +17,29 @@
 #define BONDAR_ACTUATOR
 
 #include "events.h"
+#include "Senscape.h"
 
 class Actuator {
 
+    /**
+     * 
+     * Actuators make decisions based on data dispatched with events.
+     * They will open the parachutes and handle errors.
+     * 
+     */
+
 public:
 
+    /**
+     * Any *expensive* operation should be done here and not in the constructor
+     * Returns: SUCCESS if it has been started or any error defined in error.h otherwise
+    */
+    virtual error_t start() = 0;
+
+    /**
+     * event: one of the event codes defined in events.h
+     * data: pointer to data about the event or NULL
+    */ 
     virtual void actuate(Event event, void* data) = 0;
 
 };
