@@ -44,6 +44,9 @@ private:
 
     bool started;
 
+    static void printerTask(void* eventStruct);
+    static void actuatorTask(void* eventStruct);
+
 public:
 
     static Dispatcher* createInstance();

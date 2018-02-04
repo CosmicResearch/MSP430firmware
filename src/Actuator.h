@@ -19,7 +19,7 @@
 #include "events.h"
 #include "Senscape.h"
 
-class Actuator {
+class Actuator : Listener {
 
     /**
      * 

@@ -26,6 +26,7 @@ typedef int8_t Event;
 struct event_t {
     Event event;
     void* data;
+    Listener* listener;
 };
 
 #define EVENT_UNDEFINED 0
