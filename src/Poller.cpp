@@ -222,8 +222,5 @@ void Poller::onBarometerStartDone(error_t error) {
 }
 
 void Poller::dispatch(Event event, void* data) {
-    event_t* eventData = new event_t;
-    event_t->event = event;
-    event_t->data = data;
-    postTask(this->dispatcher->dispatch, (void*)eventData);
+    this->dispatcher->dispatch(event, data);
 }

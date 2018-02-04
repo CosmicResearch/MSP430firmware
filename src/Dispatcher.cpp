@@ -71,7 +71,7 @@ error_t Dispatcher::start() {
             this->middleware.erase(pair_middleware.first);
         }
     }
-    
+
     this->started = true;
 
     for (int i = 0; i < errors_to_dispatch.size(); ++i) {
@@ -117,6 +117,7 @@ void Dispatcher::dispatch(void* eventStruct) {
     }
     event_t eventData = *((event_t*)eventStruct);
     Dispatcher::instance->dispatch(eventData.event, eventData.data);
+    delete eventStruct;
 }
 
 void Dispatcher::dispatch(Event event, void* data) {
@@ -126,14 +127,32 @@ void Dispatcher::dispatch(Event event, void* data) {
     if (this->middleware.find(event) != this->middleware.end()) {
         data = this->middleware[event].execute(event, data);
     }
-    if (this->printers.find(event) != this->printers.end()) {
-        for (int i = 0; i < this->printers[event].size(); ++i) {
-            this->printers[event][i]->print(event, data);
-        }
-    }
     if (this->actuators.find(event) != this->actuators.end()) {
         for (int i = 0; i < this->actuators[event].size(); ++i) {
-            this->actuators[event][i]->actuate(event, data);
+            event_t* eventStruct = new event_t;
+            eventStruct->event = event;
+            eventStruct->data = data;
+            eventStruct->listener = this->actuators[event][i];
+            postTask(Dispatcher::actuatorTask, eventStruct);
         }
     }
+    if (this->printers.find(event) != this->printers.end()) {
+        for (int i = 0; i < this->printers[event].size(); ++i) {
+            event_t* eventStruct = new event_t;
+            eventStruct->event = event;
+            eventStruct->data = data;
+            eventStruct->listener = this->printers[event][i];
+            postTask(Dispatcher::printerTask, eventStruct);
+        }
+    }
+}
+
+void Dispatcher::printerTask(void* eventStruct) {
+    event_t eventData = *((event_t*) eventStruct);
+    ((Printer*)eventData.listener)->print(eventData.event, eventData.data); 
+}
+
+void Dispatcher::actuatorTask(void* eventStruct) {
+    event_t eventData = *((event_t*) eventStruct);
+    ((Printer*)eventData.listener)->actuate(eventData.event, eventData.data); 
 }
