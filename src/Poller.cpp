@@ -137,22 +137,42 @@ void Poller::attachMagnetometer(Magnetometer* magne) {
 }
 
 void Poller::onGPSRead(sensor_data_t* data, error_t error) {
+    if (error != SUCCESS) {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(GPS));
+        return;
+    }
     Poller::instance->dispatch(EVENT_READ_GPS, data);
 }
 
 void Poller::onAccelerometerRead(sensor_data_t* data, error_t error) {
+    if (error != SUCCESS) {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(ACCELEROMETER));
+        return;
+    }
     Poller::instance->dispatch(EVENT_READ_ACCELEROMETER, data);
 }
 
 void Poller::onBarometerRead(sensor_data_t* data, error_t error) {
+    if (error != SUCCESS) {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(BAROMETER));
+        return;
+    }
     Poller::instance->dispatch(EVENT_READ_BAROMETER, data);
 }
 
 void Poller::onGyroscopeRead(sensor_data_t* data, error_t error) {
+    if (error != SUCCESS) {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(GYROSCOPE));
+        return;
+    }
     Poller::instance->dispatch(EVENT_READ_GYROSCOPE, data);
 }
 
 void Poller::onMagnetometerRead(sensor_data_t* data, error_t error) {
+    if (error != SUCCESS) {
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(MAGNETOMETER));
+        return;
+    }
     Poller::instance->dispatch(EVENT_READ_MAGNETOMETER, data);
 }
 
