@@ -39,7 +39,7 @@ Dispatcher* Dispatcher::createInstance() {
 error_t Dispatcher::start() {
 
     if (this->started) {
-        return ERROR;
+        return EALREADY; //Already started!
     }
 
     error_t res = SUCCESS;
@@ -81,6 +81,10 @@ error_t Dispatcher::start() {
     return res;
 }
 
+bool Dispatcher::isStarted() {
+    return this->started();
+}
+
 /**
  * Subscribe methods for actuators, printers and middleware
  */
@@ -110,15 +114,6 @@ void Dispatcher::subscribe(Event event, Middleware* middleware) {
 /**
  * Dispatch methods
  */
-
-void Dispatcher::dispatch(void* eventStruct) {
-    if (!this->started) {
-        return;
-    }
-    event_t eventData = *((event_t*)eventStruct);
-    Dispatcher::instance->dispatch(eventData.event, eventData.data);
-    delete eventStruct;
-}
 
 void Dispatcher::dispatch(Event event, void* data) {
     if (!this->started) {

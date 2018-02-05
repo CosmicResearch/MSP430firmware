@@ -38,8 +38,6 @@ private:
     std::unordered_map<Event event, std::vector<Printer*>> printers;
     std::unordered_map<Event event, Middleware*> middleware;
 
-    void dispatch(Event event, void* data);
-
     Dispatcher();
 
     bool started;
@@ -61,7 +59,9 @@ public:
     void subscribe(Event event, Printer* printer);
     void subscribe(Event event, Middleware* middleware);
 
-    static void dispatch(void* eventStruct);
+    bool isStarted();
+
+    void dispatch(Event event, void* data);
 
 };
 
