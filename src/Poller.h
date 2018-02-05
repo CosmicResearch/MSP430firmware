@@ -63,15 +63,24 @@ private:
 
 public:
 
-    static Poller createInstance(Dispatcher* dispatcher, uint32_t intervalMs = 100);
+    static Poller* createInstance(Dispatcher* dispatcher, uint32_t intervalMs = 100);
 
     error_t start();
+    error_t stop();
+
+    bool isStarted();
 
     void attachGPS(GPS* gps);
     void attachAccelerometer(Accelerometer* accel);
     void attachMagnetometer(Magnetometer* magne);
     void attachGyroscope(Gyroscope* gyro);
     void attachBarometer(Barometer* bar);
+
+    GPS* getGPS();
+    Accelerometer* getAccelerometer();
+    Magnetometer* getMagnetometer();
+    Gyroscope* getGyroscope();
+    Barometer* getBarometer();
 
 
 };
