@@ -18,9 +18,15 @@
 Dispatcher* Dispatcher::instance = NULL;
 
 Dispatcher::Dispatcher() {
-    this->actuators = std::unordered_map<Event, std::vector<Actuator*> >(16);
-    this->printers = std::unordered_map<Event, std::vector<Printer*> >(16);
-    this->middleware = std::unordered_map<Event, Middleware*>(16);
+    for (int i = 0; i < N_MAX_EVENTS; ++i) {
+        for (int j = 0; j < N_PER_EVENT; ++j) {
+            this->actuators[i][j] = NULL;
+            this->printers[i][j] = NULL;
+        }
+        this->middleware[i] = NULL;
+        this->actuators_index[i] = 0;
+        this->printers_index[i] = 0;
+    }
     this->started = false;
 }
 
@@ -44,45 +50,28 @@ error_t Dispatcher::start() {
 
     error_t res = SUCCESS;
 
-    std::vector<event_t> errors_to_dispatch(5);
-
-    for (std::pair<Event, std::vector<Actuator*> > pair_vector_actuators : this->actuators) {
-        for (int i = 0; i < vector_actuators.second.size(); ++i) {
-            error_t ret = pair_vector_actuators.second[i]->start();
-            if (ret != SUCCESS) {
-                errors_to_dispatch.push_back({EVENT_ERROR_ACTUATOR_INIT, pair_vector_actuators.second[i]});
-                pair_vector_actuators.second.erase(pair_vector_actuators.second.begin() + i);
+    for (int i = 0; i < N_MAX_EVENTS; ++i) {
+        for (int j = 0; j < N_PER_EVENT; ++j) {
+            Debug.print("starting for I=").print(i).print(" J= ").println(j);
+            if (this->actuators[i][j] != NULL) {
+                this->actuators[i][j]->start();
+            }
+            if (this->printers[i][j] != NULL) {
+                this->printers[i][j]->start();
             }
         }
-    }
-    for (std::pair<Event, std::vector<Printer*> > pair_vector_printers : this->printers) {
-        for (int i = 0; i < pair_vector_printers.second.size(); ++i) {
-            error_t ret = pair_vector_printers.second[i]->start();
-            if (ret != SUCCESS) {
-                errors_to_dispatch.push_back({EVENT_ERROR_PRINTER_INIT, pair_vector_printers.second[i]});
-                pair_vector_printers.second.erase(pair_vector_printers.second.begin() + i);
-            }
-        }
-    }
-    for (std::pair<Event, Middleware*> pair_middleware : this->middleware) {
-        error_t ret = pair_middleware.second->start();
-        if (ret != SUCCESS) {
-            errors_to_dispatch.push_back({EVENT_ERROR_MIDDLEWARE_INIT, pair_middleware.second});
-            this->middleware.erase(pair_middleware.first);
+        if (this->middleware[i] != NULL) {
+            this->middleware[i]->start();
         }
     }
 
     this->started = true;
 
-    for (int i = 0; i < errors_to_dispatch.size(); ++i) {
-        this->dispatch(errors_to_dispatch[i].event, errors_to_dispatch[i].data);
-    }
-
     return res;
 }
 
 bool Dispatcher::isStarted() {
-    return this->started();
+    return this->started;
 }
 
 /**
@@ -90,22 +79,35 @@ bool Dispatcher::isStarted() {
  */
 
 void Dispatcher::subscribe(Event event, Actuator* actuator) {
-    if (this->actuators.find(event) == this->actuators.end()) {
-        this->actuators[event] = std::vector<Actuator*>(5);
+    if (event < 0 || event >= N_MAX_EVENTS) {
+        return;
     }
-    this->actuators[event].push_back(actuator);
+    if (actuators_index[event] >= N_PER_EVENT) {
+        return;
+    }
+    uint16_t index = this->actuators_index[event];
+    this->actuators[event][index] = actuator;
     this->started = false;
+    ++(this->actuators_index[event]);
 }
 
 void Dispatcher::subscribe(Event event, Printer* printer) {
-    if (this->printers.find(event) == this->printers.end()) {
-        this->printers[event] = std::vector<Printer*>(5);
+    if (event < 0 || event >= N_MAX_EVENTS) {
+        return;
     }
-    this->printers[event].push_back(printer);
+    if (printers_index[event] >= N_PER_EVENT) {
+        return;
+    }
+    uint16_t index = this->printers_index[event];
+    this->printers[event][index] = printer;
     this->started = false;
+    ++(this->printers_index[event]);
 }
 
 void Dispatcher::subscribe(Event event, Middleware* middleware) {
+    if (event < 0 || event >= N_MAX_EVENTS) {
+        return;
+    }
     this->middleware[event] = middleware;
     this->started = false;
 }
@@ -116,27 +118,28 @@ void Dispatcher::subscribe(Event event, Middleware* middleware) {
  */
 
 void Dispatcher::dispatch(Event event, void* data) {
+    if (event < 0 || event >= N_MAX_EVENTS) {
+        return;
+    }
     if (!this->started) {
         return;
     }
-    if (this->middleware.find(event) != this->middleware.end()) {
-        data = this->middleware[event].execute(event, data);
+    if (this->middleware[event] != NULL) {
+        data = this->middleware[event]->execute(event, data);
     }
-    if (this->actuators.find(event) != this->actuators.end()) {
-        for (int i = 0; i < this->actuators[event].size(); ++i) {
+    for (int i = 0; i < N_PER_EVENT; ++i) {
+        if (this->actuators[event][i] != NULL) {
             event_t* eventStruct = new event_t;
             eventStruct->event = event;
             eventStruct->data = data;
-            eventStruct->listener = this->actuators[event][i];
+            eventStruct->listener = (Listener*)this->actuators[event][i];
             postTask(Dispatcher::actuatorTask, eventStruct);
         }
-    }
-    if (this->printers.find(event) != this->printers.end()) {
-        for (int i = 0; i < this->printers[event].size(); ++i) {
+        if (this->printers[event][i] != NULL) {
             event_t* eventStruct = new event_t;
             eventStruct->event = event;
             eventStruct->data = data;
-            eventStruct->listener = this->printers[event][i];
+            eventStruct->listener = (Listener*)this->printers[event][i];
             postTask(Dispatcher::printerTask, eventStruct);
         }
     }
@@ -144,10 +147,14 @@ void Dispatcher::dispatch(Event event, void* data) {
 
 void Dispatcher::printerTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
-    ((Printer*)eventData.listener)->print(eventData.event, eventData.data); 
+    ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
+    delete ((event_t*)eventStruct)->data;
+    delete (event_t*)eventStruct;
 }
 
 void Dispatcher::actuatorTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
-    ((Printer*)eventData.listener)->actuate(eventData.event, eventData.data); 
+    ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
+    delete ((event_t*)eventStruct)->data;
+    delete (event_t*)eventStruct;
 }
