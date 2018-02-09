@@ -1,6 +1,6 @@
 /*
     Bondar avionics
-    Copyright (C) 2017  Associació Cosmic Research
+    Copyright (C) 2017  AssociaciÃ³ Cosmic Research
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -15,17 +15,30 @@
 
 #include "Poller.h"
 #include "Dispatcher.h"
+#include "printers/DebugPrinter.h"
+#include "events.h"
+#include "GPS.h"
 
 Poller* poller;
 Dispatcher* dispatcher;
+DebugPrinter* printer = new DebugPrinter();
 
 void setup(void) {
+    Debug.begin();
+    Debug.println("====STARTING====");
     dispatcher = Dispatcher::createInstance();
-    //TODO: subscribe actuators and printers to the dispatcher
+    /*TODO: subscribe actuators and printers to the dispatcher*/
+    dispatcher->subscribe(EVENT_READ_GPS, (Printer*)printer);
+    dispatcher->subscribe(EVENT_SENSOR_INIT, (Printer*)printer);
+    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, (Printer*)printer);
+    //dispatcher->start();
     poller = Poller::createInstance(dispatcher, 100);
-    //TODO: attach sensors to the poller
+    /*TODO: attach sensors to the poller*/
+    poller->attachGPS(new GPS(&Serial0, 115200));
+    //Debug.println("Starting poller");
     poller->start();
+
 }
 
-// Nothing to do here (づ◔ ͜ʖ◔)づ
+// Nothing to do here
 void loop(void) {}

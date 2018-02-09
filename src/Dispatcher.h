@@ -16,9 +16,6 @@
 #ifndef BONDAR_DISPATHCER
 #define BONDAR_DISPATHCER
 
-#include <cstdint>
-#include <unordered_map>
-#include <vector>
 #include "Actuator.h"
 #include "Printer.h"
 #include "Middleware.h"
@@ -31,12 +28,15 @@ private:
     static Dispatcher* instance;
 
     /**
-     * At the moment, just one Middleware per event is allowed.
+     * At the moment, just one Middleware per event is allowed. 5 actuators and printers per event
      */
 
-    std::unordered_map<Event event, std::vector<Actuator*>> actuators;
-    std::unordered_map<Event event, std::vector<Printer*>> printers;
-    std::unordered_map<Event event, Middleware*> middleware;
+    Actuator* actuators[N_MAX_EVENTS][N_PER_EVENT];
+    Printer* printers[N_MAX_EVENTS][N_PER_EVENT];
+    Middleware* middleware[N_MAX_EVENTS];
+
+    uint16_t actuators_index[N_MAX_EVENTS];
+    uint16_t printers_index[N_MAX_EVENTS];
 
     Dispatcher();
 

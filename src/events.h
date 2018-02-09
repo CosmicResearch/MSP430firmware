@@ -16,7 +16,8 @@
 #ifndef BONDAR_EVENTS
 #define BONDAR_EVENTS
 
-#include <cstdint>
+#include <stdint.h>
+#include "Listener.h"
 
 typedef int8_t Event;
 
@@ -28,6 +29,9 @@ struct event_t {
     void* data;
     Listener* listener;
 };
+
+#define N_MAX_EVENTS 64
+#define N_PER_EVENT 5
 
 #define EVENT_UNDEFINED 0
 
@@ -57,24 +61,24 @@ struct event_t {
 #define EVENT_SENSOR_INIT 19
 
 /**
- * ERRORS < 0
+ * ERRORS < 32-63
 */
 
-#define EVENT_ERROR -1
-#define EVENT_ERROR_SENSOR_INIT -2
-#define EVENT_ERROR_PRINTER_INIT -3
-#define EVENT_ERROR_ACTUATOR_INIT -4
-#define EVENT_ERROR_MIDDLEWARE_INIT -5
-#define EVENT_ERROR_SENSOR_READ -6
+#define EVENT_ERROR 32
+#define EVENT_ERROR_SENSOR_INIT 33
+#define EVENT_ERROR_PRINTER_INIT 34
+#define EVENT_ERROR_ACTUATOR_INIT 35
+#define EVENT_ERROR_MIDDLEWARE_INIT 36
+#define EVENT_ERROR_SENSOR_READ 37
 
 /**
  * SENSORS
 */
 
-#define GPS 0
-#define ACCELEROMETER 1
-#define GYROSCOPE 2
-#define MAGNETOMETER 3
-#define BAROMETER 4
+#define SENSOR_GPS 0
+#define SENSOR_ACCELEROMETER 1
+#define SENSOR_GYROSCOPE 2
+#define SENSOR_MAGNETOMETER 3
+#define SENSOR_BAROMETER 4
 
 #endif
