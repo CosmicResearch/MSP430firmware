@@ -17,16 +17,34 @@
 #include "GPS.h"
 
 DebugPrinter::DebugPrinter() {
-
+    this->started = false;
 }
 
 error_t DebugPrinter::start() {
-    //Debug.begin();
-    Debug.println("Started DebugPrinter");
+    if (!started) {
+#ifndef __DEBUG__
+        Debug.begin();
+#endif
+        Debug.println("Started DebugPrinter");
+        this->started = true;
+    }
     return SUCCESS;
 }
 
+error_t DebugPrinter::stop() {
+    Debug.end();
+    this->started = false;
+    return SUCCESS;
+}
+
+bool DebugPrinter::isStarted() {
+    return this->started;
+}
+
 void DebugPrinter::print(Event event, void* data) {
+    if (!this->started) {
+        return;
+    }
     Debug.print("Received event").println(event);
 
     switch(event) {
@@ -36,7 +54,7 @@ void DebugPrinter::print(Event event, void* data) {
             gps_data_t gps_data = *((gps_data_t*)data);
             Debug.print("Latitude: ").print(gps_data.latitude/1000000.0f).println(gps_data.latitudeChar);
             Debug.print("Longitude: ").print(gps_data.longitude/1000000.0f).println(gps_data.longitudeChar);
-            Debug.print("Altitude: ").print(gps_data.altitude).println(" m");
+            Debug.print("Altitude: ").print(gps_data.altitude/100.0f).println(" m");
             Debug.print("Fix: ").println(gps_data.fix);
             Debug.print("Time: ").print(gps_data.hour).print(":").print(gps_data.minute).print(":").println(gps_data.seconds);
             Debug.print("Type: ").println(gps_data.type);
