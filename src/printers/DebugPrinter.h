@@ -23,11 +23,17 @@ class DebugPrinter : public Printer {
 
 private:
 
+    bool started;
+
 public:
 
     DebugPrinter();
 
     virtual error_t start();
+
+    virtual error_t stop();
+
+    virtual bool isStarted();
 
     virtual void print(Event e, void* data);
 

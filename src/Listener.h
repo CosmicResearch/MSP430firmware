@@ -16,7 +16,15 @@
 #ifndef BONDAR_LISTENER
 #define BONDAR_LISTENER
 
+#include "Senscape.h"
+
 class Listener {
+
+    virtual error_t start() = 0;
+
+    virtual error_t stop() = 0;
+
+    virtual bool isStarted() = 0;
 
 };
 

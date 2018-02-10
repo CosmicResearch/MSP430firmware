@@ -19,7 +19,7 @@
 #include "events.h"
 #include "Senscape.h"
 
-class Printer : Listener {
+class Printer : public Listener {
 
     /**
      * 
@@ -34,6 +34,10 @@ public:
      * Returns: SUCCESS if it has been started or any error defined in error.h otherwise
     */
     virtual error_t start() = 0;
+
+    virtual error_t stop() = 0;
+
+    virtual bool isStarted() = 0;
 
     /**
      * event: one of the event codes defined in events.h

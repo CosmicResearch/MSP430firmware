@@ -28,16 +28,15 @@ void setup(void) {
     Debug.println("====STARTING====");
     dispatcher = Dispatcher::createInstance();
     /*TODO: subscribe actuators and printers to the dispatcher*/
-    dispatcher->subscribe(EVENT_READ_GPS, (Printer*)printer);
-    dispatcher->subscribe(EVENT_SENSOR_INIT, (Printer*)printer);
-    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, (Printer*)printer);
+    dispatcher->subscribe(EVENT_READ_GPS, printer);
+    dispatcher->subscribe(EVENT_SENSOR_INIT, printer);
+    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer);
     //dispatcher->start();
     poller = Poller::createInstance(dispatcher, 100);
     /*TODO: attach sensors to the poller*/
-    poller->attachGPS(new GPS(&Serial0, 115200));
+    poller->attachGPS(new GPS(&Serial0, 9600)); //Baudrate should be 115200 and 10Hz freq
     //Debug.println("Starting poller");
     poller->start();
-
 }
 
 // Nothing to do here
