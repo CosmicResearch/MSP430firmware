@@ -34,3 +34,5 @@
 .vscode
 *.ld
 Debug/
+targetConfigs/
+.launches/
