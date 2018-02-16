@@ -74,7 +74,7 @@ void setup(void) {
     dispatcher->subscribe(EVENT_READ_ACCELEROMETER, printer);
     dispatcher->subscribe(EVENT_SENSOR_INIT, printer);
     dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer);
-    poller = Poller::createInstance(dispatcher, 100);
+    poller = Poller::createInstance(dispatcher, 50);
     /*TODO: attach sensors to the poller*/
     poller->attachGPS(&gps); //Baudrate should be 115200 and 10Hz freq
     poller->attachAccelerometer(&accel);
