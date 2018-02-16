@@ -29,6 +29,10 @@ Poller::Poller(uint32_t intervalMs, Dispatcher* dispatcher, SensTimer* timer) {
     this->dispatcher = dispatcher;
     this->timer = timer;
     this->started = false;
+    this->accel = NULL;
+    this->magne = NULL;
+    this->bar = NULL;
+    this->gps = NULL;
 }
 
 error_t Poller::start() {
@@ -44,49 +48,49 @@ error_t Poller::start() {
     }
     error_t res = SUCCESS;
 
-
-    this->gps->attachReadDone(onGPSRead);
-    this->magne->attachReadDone(onMagnetometerRead);
-    this->accel->attachReadDone(onAccelerometerRead);
-  //  this->gyro->attachReadDone(onGyroscopeRead);
-   // this->bar->attachReadDone(onBarometerRead);*/
-
-    this->gps->attachStartDone(onGPSStartDone);
-    this->magne->attachStartDone(onMagnetometerStartDone);
-    this->accel->attachStartDone(onAccelerometerStartDone);
- //   this->gyro->attachStartDone(onGyroscopeStartDone);
- //   this->bar->attachStartDone(onBarometerStartDone);*/
-
     if (this->gps != NULL && !this->gps->isStarted()) {
+        this->gps->attachStartDone(onGPSStartDone);
+        this->gps->attachReadDone(onGPSRead);
         error_t ret = this->gps->start();
         if (ret != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(SENSOR_GPS));
         }
     }
+
     if (this->magne != NULL && !this->magne->isStarted()) {
+        this->magne->attachStartDone(onMagnetometerStartDone);
+        this->magne->attachReadDone(onMagnetometerRead);
         error_t ret = this->magne->start();
         if (ret != SUCCESS) {
            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(SENSOR_MAGNETOMETER));
         }
     }
+
     if (this->accel != NULL && !this->accel->isStarted()) {
+        this->accel->attachStartDone(onAccelerometerStartDone);
+        this->accel->attachReadDone(onAccelerometerRead);
         error_t ret = this->accel->start();
         if (ret != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(SENSOR_ACCELEROMETER));
         }
     }
-/*    if (this->gyro != NULL && !this->gyro->isStarted()) {
+/*
+    if (this->gyro != NULL && !this->gyro->isStarted()) {
+        this->gyro->attachStartDone(onGyroscopeStartDone);
+        this->gyro->attachReadDone(onGyroscopeRead);
         error_t ret = this->gyro->start();
         if (ret != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(GYROSCOPE));
         }
-    }
+    }*/
     if (this->bar != NULL && !this->bar->isStarted()) {
+        this->bar->attachStartDone(onBarometerStartDone);
+        this->bar->attachReadDone(onBarometerRead);
         error_t ret = this->bar->start();
         if (ret != SUCCESS) {
-            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(BAROMETER));
+            this->dispatch(EVENT_ERROR_SENSOR_INIT, new int(SENSOR_BAROMETER));
         }
-    }*/
+    }
 
     this->timer->attachCallback(tick);
     this->timer->startPeriodic(this->interval);
@@ -136,13 +140,13 @@ void Poller::readSensors() {
         if (error != SUCCESS) {
             this->dispatch(EVENT_ERROR_SENSOR_READ, new int(GYROSCOPE));
         }
-    }
+    }*/
     if (this->bar != NULL && this->bar->isStarted()) {
         error_t error = this->bar->read();
         if (error != SUCCESS) {
-            this->dispatch(EVENT_ERROR_SENSOR_READ, new int(BAROMETER));
+            this->dispatch(EVENT_ERROR_SENSOR_READ, new int(SENSOR_BAROMETER));
         }
-    }*/
+    }
 }
 
 void Poller::attachGPS(GPS* gps) {
@@ -159,13 +163,13 @@ void Poller::attachAccelerometer(Accelerometer* accel) {
     }
 }
 
-/*void Poller::attachBarometer(Barometer* bar) {
+void Poller::attachBarometer(Barometer* bar) {
     this->bar = bar;
     if (this->started) {
         this->stop();
     }
 }
-
+/*
 void Poller::attachGyroscope(Gyroscope* gyro) {
     this->gyro = gyro;
     if (this->started) {
@@ -196,17 +200,17 @@ void Poller::onAccelerometerRead(sensor_data_t* data, error_t error) {
     Poller::instance->dispatch(EVENT_READ_ACCELEROMETER, data);
 }
 
-/*void Poller::onBarometerRead(sensor_data_t* data, error_t error) {
+void Poller::onBarometerRead(sensor_data_t* data, error_t error) {
     if (error != SUCCESS) {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(BAROMETER));
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(SENSOR_BAROMETER));
         return;
     }
     Poller::instance->dispatch(EVENT_READ_BAROMETER, data);
 }
-
+/*
 void Poller::onGyroscopeRead(sensor_data_t* data, error_t error) {
     if (error != SUCCESS) {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(GYROSCOPE));
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new int(SENSOR_GYROSCOPE));
         return;
     }
     Poller::instance->dispatch(EVENT_READ_GYROSCOPE, data);
@@ -256,14 +260,14 @@ void Poller::onMagnetometerStartDone(error_t error) {
     }
 }
 
-/*void Poller::onBarometerStartDone(error_t error) {
+void Poller::onBarometerStartDone(error_t error) {
     if (error == SUCCESS) {
-        Poller::instance->dispatch(EVENT_SENSOR_INIT, new int(BAROMETER));
+        Poller::instance->dispatch(EVENT_SENSOR_INIT, new int(SENSOR_BAROMETER));
     }
     else {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new int(BAROMETER));
+        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new int(SENSOR_BAROMETER));
     }
-}*/
+}
 
 void Poller::dispatch(Event event, void* data) {
     this->dispatcher->dispatch(event, data);
@@ -283,8 +287,8 @@ Magnetometer* Poller::getMagnetometer() {
 
 /*Gyroscope* Poller::getGyroscope() {
     return this->gyro;
-}
+}*/
 
 Barometer* Poller::getBarometer() {
     return this->bar;
-}*/
+}
