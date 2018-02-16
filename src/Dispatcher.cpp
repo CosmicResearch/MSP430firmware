@@ -52,7 +52,6 @@ error_t Dispatcher::start() {
 
     for (int i = 0; i < N_MAX_EVENTS; ++i) {
         for (int j = 0; j < N_PER_EVENT; ++j) {
-            Debug.print("starting for I=").print(i).print(" J= ").println(j);
             if (this->actuators[i][j] != NULL) {
                 this->actuators[i][j]->start();
             }

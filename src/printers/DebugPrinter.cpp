@@ -15,6 +15,7 @@
 
 #include "DebugPrinter.h"
 #include "GPS.h"
+#include "Accelerometer.h"
 
 DebugPrinter::DebugPrinter() {
     this->started = false;
@@ -58,6 +59,12 @@ void DebugPrinter::print(Event event, void* data) {
             Debug.print("Fix: ").println(gps_data.fix);
             Debug.print("Time: ").print(gps_data.hour).print(":").print(gps_data.minute).print(":").println(gps_data.seconds);
             Debug.print("Type: ").println(gps_data.type);
+            break;
+        }
+        case EVENT_READ_ACCELEROMETER : {
+            Debug.println("Received accelerometer data");
+            adxl377_data_t accel_data = *((adxl377_data_t*)data);
+            Debug.print("x: ").print(accel_data._chanx).print(" y: ").print(accel_data._chany).print(" z: ").println(accel_data._chanz);
             break;
         }
         case EVENT_SENSOR_INIT: {
