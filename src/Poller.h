@@ -19,6 +19,7 @@
 #include "Senscape.h"
 #include "GPS.h"
 #include "Accelerometer.h"
+#include "Magnetometer.h"
 #include "SensTimer.h"
 #include "events.h"
 #include "Dispatcher.h"
@@ -33,8 +34,8 @@ private:
 
     GPS* gps;
     Accelerometer* accel;
-    /*   Magnetometer* magne;
-    Gyroscope* gyro;
+    Magnetometer* magne;
+    /*Gyroscope* gyro;
     Barometer* bar;*/
 
     int32_t interval;
@@ -47,14 +48,14 @@ private:
 
     static void onGPSRead(sensor_data_t* data, error_t error);
     static void onAccelerometerRead(sensor_data_t* data, error_t error);
-    /*static void onMagnetometerRead(sensor_data_t* data, error_t error);
-    static void onGyroscopeRead(sensor_data_t* data, error_t error);
+    static void onMagnetometerRead(sensor_data_t* data, error_t error);
+    /*static void onGyroscopeRead(sensor_data_t* data, error_t error);
     static void onBarometerRead(sensor_data_t* data, error_t error);*/
 
     static void onGPSStartDone(error_t error);
     static void onAccelerometerStartDone(error_t error);
-/*    static void onMagnetometerStartDone(error_t error);
-    static void onGyroscopeStartDone(error_t error);
+    static void onMagnetometerStartDone(error_t error);
+    /*static void onGyroscopeStartDone(error_t error);
     static void onBarometerStartDone(error_t error);*/
 
     void dispatch(Event event, void* data);
@@ -72,13 +73,13 @@ public:
 
     void attachGPS(GPS* gps);
     void attachAccelerometer(Accelerometer* accel);
- /*   void attachMagnetometer(Magnetometer* magne);
-    void attachGyroscope(Gyroscope* gyro);
+    void attachMagnetometer(Magnetometer* magne);
+    /*void attachGyroscope(Gyroscope* gyro);
     void attachBarometer(Barometer* bar);*/
 
     GPS* getGPS();
     Accelerometer* getAccelerometer();
-  //  Magnetometer* getMagnetometer();
+    Magnetometer* getMagnetometer();
    // Gyroscope* getGyroscope();
     //Barometer* getBarometer();
 
