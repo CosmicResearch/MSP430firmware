@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "Listener.h"
+#include "Senscape.h"
 
 typedef int8_t Event;
 
@@ -36,7 +37,7 @@ struct event_t {
 #define EVENT_UNDEFINED 0
 
 /**
- * SENSOR READINGS 1-15
+ * SENSOR READINGS & FILTERS 1-15
 */
 
 #define EVENT_READ_MIN 1
@@ -47,6 +48,7 @@ struct event_t {
 #define EVENT_READ_MAGNETOMETER 3
 #define EVENT_READ_GYROSCOPE 4
 #define EVENT_READ_BAROMETER 5
+#define EVENT_READ_KALMAN 6
 
 /**
  * NOTIFICATIONS 16-31
@@ -58,6 +60,7 @@ struct event_t {
 #define EVENT_APOGEE  16
 #define EVENT_MAIN_FIRED 17
 #define EVENT_DROGUE_FIRED 18
+#define EVENT_PILOT_FIRED 18 //PILOT == DROGUE
 #define EVENT_SENSOR_INIT 19
 #define EVENT_LIFTOFF 20
 #define EVENT_SUPERSONIC_STARTED 21
@@ -73,6 +76,8 @@ struct event_t {
 #define EVENT_ERROR_ACTUATOR_INIT 35
 #define EVENT_ERROR_MIDDLEWARE_INIT 36
 #define EVENT_ERROR_SENSOR_READ 37
+#define EVENT_ERROR_PILOT 38
+#define EVENT_ERROR_MAIN 39
 
 /**
  * SENSORS
