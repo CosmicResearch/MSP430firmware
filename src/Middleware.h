@@ -23,8 +23,7 @@ class Middleware : public Listener {
 
     /**
      * 
-     * Middleware take data dispatched with events and transforms it before being dispatched
-     * to Printers and Actuators.
+     * Middleware take data dispatched with events and transforms it or emits new events based on the data
      * 
      */
 
@@ -44,7 +43,7 @@ public:
      * event: one of the event codes defined in events.h
      * data: pointer to data about the event or NULL
     */ 
-    virtual void* execute(Event event, void* data) = 0;
+    virtual void execute(Event event, void* data) = 0;
 
 };
 

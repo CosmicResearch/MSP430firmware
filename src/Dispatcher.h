@@ -28,15 +28,16 @@ private:
     static Dispatcher* instance;
 
     /**
-     * At the moment, just one Middleware per event is allowed. 5 actuators and printers per event
+     * 5 actuators, printers and middleware per event
      */
 
     Actuator* actuators[N_MAX_EVENTS][N_PER_EVENT];
     Printer* printers[N_MAX_EVENTS][N_PER_EVENT];
-    Middleware* middleware[N_MAX_EVENTS];
+    Middleware* middleware[N_MAX_EVENTS][N_PER_EVENT];
 
     uint16_t actuators_index[N_MAX_EVENTS];
     uint16_t printers_index[N_MAX_EVENTS];
+    uint16_t middleware_index[N_MAX_EVENTS];
 
     Dispatcher();
 
@@ -44,6 +45,7 @@ private:
 
     static void printerTask(void* eventStruct);
     static void actuatorTask(void* eventStruct);
+    static void middlewareTask(void* eventStruct);
 
 public:
 
