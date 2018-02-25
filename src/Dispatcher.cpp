@@ -22,10 +22,11 @@ Dispatcher::Dispatcher() {
         for (int j = 0; j < N_PER_EVENT; ++j) {
             this->actuators[i][j] = NULL;
             this->printers[i][j] = NULL;
+            this->middleware[i][j] = NULL;
         }
-        this->middleware[i] = NULL;
         this->actuators_index[i] = 0;
         this->printers_index[i] = 0;
+        this->middleware_index[i] = 0;
     }
     this->started = false;
 }
@@ -52,15 +53,15 @@ error_t Dispatcher::start() {
 
     for (int i = 0; i < N_MAX_EVENTS; ++i) {
         for (int j = 0; j < N_PER_EVENT; ++j) {
-            if (this->actuators[i][j] != NULL) {
+            if (this->actuators[i][j] != NULL && !this->actuators[i][j]->isStarted()) {
                 this->actuators[i][j]->start();
             }
-            if (this->printers[i][j] != NULL) {
+            if (this->printers[i][j] != NULL && !this->printers[i][j]->isStarted()) {
                 this->printers[i][j]->start();
             }
-        }
-        if (this->middleware[i] != NULL) {
-            this->middleware[i]->start();
+            if (this->middleware[i][j] != NULL && !this->middleware[i][j]->isStarted()) {
+                this->middleware[i][j]->start();
+            }
         }
     }
 
@@ -107,8 +108,13 @@ void Dispatcher::subscribe(Event event, Middleware* middleware) {
     if (event < 0 || event >= N_MAX_EVENTS) {
         return;
     }
-    this->middleware[event] = middleware;
+    if (middleware_index[event] >= N_PER_EVENT) {
+        return;
+    }
+    uint16_t index = this->middleware_index[event];
+    this->middleware[event][index] = middleware;
     this->started = false;
+    ++(this->middleware_index[event]);
 }
 
 
@@ -123,10 +129,14 @@ void Dispatcher::dispatch(Event event, void* data) {
     if (!this->started) {
         return;
     }
-    if (this->middleware[event] != NULL) {
-        data = this->middleware[event]->execute(event, data);
-    }
     for (int i = 0; i < N_PER_EVENT; ++i) {
+        if (this->middleware[event][i] != NULL) {
+            event_t* eventStruct = new event_t;
+            eventStruct->event = event;
+            eventStruct->data = data;
+            eventStruct->listener = (Listener*)this->middleware[event][i];
+            postTask(Dispatcher::middlewareTask, eventStruct);
+        }
         if (this->actuators[event][i] != NULL) {
             event_t* eventStruct = new event_t;
             eventStruct->event = event;
@@ -144,6 +154,10 @@ void Dispatcher::dispatch(Event event, void* data) {
     }
 }
 
+/**
+ * Dispatch tasks to make execution async
+ */
+
 void Dispatcher::printerTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
@@ -154,6 +168,13 @@ void Dispatcher::printerTask(void* eventStruct) {
 void Dispatcher::actuatorTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
+    delete ((event_t*)eventStruct)->data;
+    delete (event_t*)eventStruct;
+}
+
+void Dispatcher::middlewareTask(void* eventStruct) {
+    event_t eventData = *((event_t*) eventStruct);
+    ((Middleware*)eventData.listener)->execute(eventData.event, eventData.data);
     delete ((event_t*)eventStruct)->data;
     delete (event_t*)eventStruct;
 }
