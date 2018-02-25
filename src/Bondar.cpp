@@ -19,10 +19,12 @@
 #include "events.h"
 #include "GPS.h"
 #include "SensADC.h"
+#include "actuators/PilotActuator.h"
 
 Poller* poller;
 Dispatcher* dispatcher;
 DebugPrinter* printer = new DebugPrinter();
+PilotActuator mainActuator = PilotActuator();
 
 Resource resx = Resource(ARBITER_ADC);
 Resource resy = Resource(ARBITER_ADC);
@@ -66,14 +68,17 @@ GPS gps = GPS(&Serial0, 9600);
 Accelerometer accel = Accelerometer(&adcx, &adcy, &adcz);
 
 void setup(void) {
+#ifdef __DEBUG__
     Debug.begin();
     Debug.println("====STARTING====");
+#endif
     dispatcher = Dispatcher::createInstance();
     /*TODO: subscribe actuators and printers to the dispatcher*/
     dispatcher->subscribe(EVENT_READ_GPS, printer);
     dispatcher->subscribe(EVENT_READ_ACCELEROMETER, printer);
     dispatcher->subscribe(EVENT_SENSOR_INIT, printer);
     dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer);
+    dispatcher->subscribe(EVENT_APOGEE, &mainActuator);
     poller = Poller::createInstance(dispatcher, 50);
     /*TODO: attach sensors to the poller*/
     poller->attachGPS(&gps); //Baudrate should be 115200 and 10Hz freq
