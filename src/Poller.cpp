@@ -80,7 +80,7 @@ error_t Poller::start() {
         this->gyro->attachReadDone(onGyroscopeRead);
         error_t ret = this->gyro->start();
         if (ret != SUCCESS) {
-            this->dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENOR_GYROSCOPE));
+            this->dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_GYROSCOPE));
         }
     }
     if (this->bar != NULL && !this->bar->isStarted()) {
