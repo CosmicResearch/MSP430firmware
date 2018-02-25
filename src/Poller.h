@@ -20,6 +20,7 @@
 #include "GPS.h"
 #include "Accelerometer.h"
 #include "Magnetometer.h"
+#include "Gyroscope.h"
 #include "Barometer.h"
 #include "SensTimer.h"
 #include "events.h"
@@ -36,7 +37,7 @@ private:
     GPS* gps;
     Accelerometer* accel;
     Magnetometer* magne;
-    //Gyroscope* gyro;
+    Gyroscope* gyro;
     Barometer* bar;
 
     int32_t interval;
@@ -50,13 +51,13 @@ private:
     static void onGPSRead(sensor_data_t* data, error_t error);
     static void onAccelerometerRead(sensor_data_t* data, error_t error);
     static void onMagnetometerRead(sensor_data_t* data, error_t error);
-    //static void onGyroscopeRead(sensor_data_t* data, error_t error);
+    static void onGyroscopeRead(sensor_data_t* data, error_t error);
     static void onBarometerRead(sensor_data_t* data, error_t error);
 
     static void onGPSStartDone(error_t error);
     static void onAccelerometerStartDone(error_t error);
     static void onMagnetometerStartDone(error_t error);
-    //static void onGyroscopeStartDone(error_t error);
+    static void onGyroscopeStartDone(error_t error);
     static void onBarometerStartDone(error_t error);
 
     void dispatch(Event event, void* data);
@@ -75,13 +76,13 @@ public:
     void attachGPS(GPS* gps);
     void attachAccelerometer(Accelerometer* accel);
     void attachMagnetometer(Magnetometer* magne);
-    //void attachGyroscope(Gyroscope* gyro);
+    void attachGyroscope(Gyroscope* gyro);
     void attachBarometer(Barometer* bar);
 
     GPS* getGPS();
     Accelerometer* getAccelerometer();
     Magnetometer* getMagnetometer();
-   // Gyroscope* getGyroscope();
+    Gyroscope* getGyroscope();
     Barometer* getBarometer();
 
 
