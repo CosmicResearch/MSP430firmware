@@ -51,6 +51,8 @@ public:
 
     static Dispatcher* createInstance();
 
+    static void reset();
+
     error_t start();
 
     /**

@@ -38,6 +38,11 @@ Dispatcher* Dispatcher::createInstance() {
     return Dispatcher::instance;
 }
 
+void Dispatcher::reset() {
+    delete Dispatcher::instance;
+    Dispatcher::instance = NULL;
+}
+
 /**
  * Starts every Actuator, Printer and Middleware subscribed
  * If any of them returns ERROR, it is deleted and a EVENT_ERROR is dispatched
@@ -161,20 +166,26 @@ void Dispatcher::dispatch(Event event, void* data) {
 void Dispatcher::printerTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
+#ifndef __TEST__
     delete ((event_t*)eventStruct)->data;
     delete (event_t*)eventStruct;
+#endif
 }
 
 void Dispatcher::actuatorTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
+#ifndef __TEST__
     delete ((event_t*)eventStruct)->data;
     delete (event_t*)eventStruct;
+#endif
 }
 
 void Dispatcher::middlewareTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Middleware*)eventData.listener)->execute(eventData.event, eventData.data);
+#ifndef __TEST__
     delete ((event_t*)eventStruct)->data;
     delete (event_t*)eventStruct;
+#endif
 }
