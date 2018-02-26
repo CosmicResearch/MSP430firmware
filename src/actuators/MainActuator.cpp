@@ -54,10 +54,12 @@ void MainActuator::actuate(Event event, void* data) {
             if (apogee && *((int*)data) <= ALTITUDE_MAIN) { //TODO: change this when the kalman filter is done
 
                 bool mainOpen = this->openMain();
-
+                Dispatcher* dispatcher = Dispatcher::createInstance();
                 if (!mainOpen) {
-                    Dispatcher* dispatcher = Dispatcher::createInstance();
                     dispatcher->dispatch(EVENT_ERROR_MAIN, data); // :| the chute probably won't open
+                }
+                else {
+                    dispatcher->dispatch(EVENT_MAIN_FIRED, data);
                 }
 
             }
@@ -98,7 +100,7 @@ bool MainActuator::checkContinuity(uint8_t pinOUT, uint8_t pinIN) {
 
     bool res;
 
-    pinMode(pinOUT, OUT);
+    pinMode(pinOUT, OUTPUT);
     pinMode(pinIN, INPUT);
 
     digitalWrite(pinOUT, HIGH);

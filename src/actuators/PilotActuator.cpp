@@ -68,12 +68,13 @@ void PilotActuator::actuate(Event event, void* data) {
             if (this->checkContinuity(PIN_PILOT_CONTINUITY_OUT_ALT, PIN_PILOT_CONTINUITY_IN_ALT)) {
                 Dispatcher* dispatcher = Dispatcher::createInstance();
                 dispatcher->dispatch(EVENT_ERROR_PILOT, data); //SHEEET. The pilot has not been fired
+                return;
             }
 
         }
 
         Dispatcher* dispatcher = Dispatcher::createInstance();
-        dispatcher->dispatch(EVENT_MAIN_FIRED, data);
+        dispatcher->dispatch(EVENT_PILOT_FIRED, data);
     }
 }
 
@@ -81,7 +82,7 @@ bool PilotActuator::checkContinuity(uint8_t pinOUT, uint8_t pinIN) {
 
     bool res;
 
-    pinMode(pinOUT, OUT);
+    pinMode(pinOUT, OUTPUT);
     pinMode(pinIN, INPUT);
 
     digitalWrite(pinOUT, HIGH);

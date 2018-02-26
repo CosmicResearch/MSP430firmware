@@ -96,7 +96,7 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/STL"/>
 						<entry excluding="test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="lib/Bondarlibs"/>
-						<entry excluding="src/altitude_kf.cpp|src/Apogee.cpp|msp430f2617.ld|lib|msp430f2616_symbols.ld" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="test|src/altitude_kf.cpp|src/Apogee.cpp|msp430f2617.ld|lib|msp430f2616_symbols.ld" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
