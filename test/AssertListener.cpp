@@ -16,42 +16,38 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "TestPrinter.h"
+#include "AssertListener.h"
 
-TestPrinter::TestPrinter() {
+AssertListener::AssertListener() {
+
+    for (int i = 0; i < N_MAX_EVENTS; ++i) {
+        this->numberEvents[i] = 0;
+    }
+
     this->started = false;
+
 }
 
-error_t TestPrinter::start() {
+error_t AssertListener::start() {
     this->started = true;
     return SUCCESS;
 }
 
-error_t TestPrinter::stop() {
+error_t AssertListener::stop() {
     this->started = false;
     return SUCCESS;
 }
 
-bool TestPrinter::isStarted() {
+bool AssertListener::isStarted() {
     return this->started;
 }
 
-void TestPrinter::print(Event e, void* data) {
+void AssertListener::actuate(Event e, void* data) {
 
-    if (e == EVENT_APOGEE) {
-        std::cout << "APOGEE detected at " <<  *((int*)data) << "m!" << std::endl;
-    }
-    else if (e == EVENT_MAIN_FIRED) {
-        std::cout << "MAIN fired!" << std::endl;
-    }
-    else if (e == EVENT_PILOT_FIRED) {
-        std::cout << "PILOT fired!" << std::endl;
-    }
-    else if (e == EVENT_ERROR_PILOT) {
-        std::cout << "PILOT ERROR!!!" << std::endl;
-    }
-    else if (e == EVENT_ERROR_MAIN) {
-        std::cout << "MAIN ERROR!!!" << std::endl;
-    }
+    ++(this->numberEvents[e]);
 
+}
+
+int AssertListener::getNumEvent(Event e) {
+    return this->numberEvents[e];
 }
