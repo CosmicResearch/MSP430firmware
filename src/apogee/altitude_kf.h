@@ -9,6 +9,8 @@
  * @date 23 Jul 2015
  */
 
+#include "Senscape.h"
+
 #ifndef _ALTITUDE_KF_H_
 #define _ALTITUDE_KF_H_
 
@@ -24,13 +26,19 @@ public:
 	 * @param Q_accel covariance of acceleration input signal (σ^2).
 	 * @param R_altitude covariance of the altitude measurement (σ^2).
 	 */
-	Altitude_KF(float_t Q_accel, float_t R_altitude) {
+	Altitude_KF(float_t Q_accel, float_t R_altitude, float_t Process_noise) {
 
 		this->Q_accel = Q_accel;
 		this->R_altitude = R_altitude;
+		this->q = Process_noise;
 
 		h = 0.0f;
 		v = 0.0f;
+
+		P[0][0] = 0.1f;
+		P[0][1] = 0.0f;
+		P[1][0] = 0.0f;
+		P[1][1] = 0.1f;
 	}
 
 	/**
@@ -63,6 +71,8 @@ public:
 	 */
 	float_t v;
 
+	float_t q; //process noise
+
 	/**
 	 * Accelerometer covariance.
 	 */
@@ -78,11 +88,8 @@ private:
 	/**
 	 * Predicted covariance matrix 'P'.
 	 */
-	float_t P[2][2] =
-	{
-		{ 1.0f,     0.0f },
-		{ 0.0f,     1.0f }
-	};
+	float_t P[2][2];
+
 
 };
 

@@ -11,10 +11,10 @@
 
 #include "altitude_kf.h"
 
-void Altitude_KF::propagate(float_t acceleration, const float_t dt) {
+void Altitude_KF::propagate(float acceleration, const float dt) {
 
 	// Repeated arithmetics
-	float_t _dtdt = dt * dt;
+	float _dtdt = dt * dt;
 
 	// The state vector is defined as x = [h v]' where  'h' is altitude above ground and 'v' velocity, both
 	// aligned with the vertical direction of the Earth NED frame, but positive direction being upwards to zenith.
@@ -51,7 +51,7 @@ void Altitude_KF::propagate(float_t acceleration, const float_t dt) {
 	// Calculate the state estimate covariance
 	//
 	// Repeated arithmetics
-	float_t _Q_accel_dtdt = Q_accel * _dtdt;
+	float _Q_accel_dtdt = Q_accel * _dtdt;
 	//
 	P[0][0] = P[0][0] + (P[1][0] + P[0][1] + (P[1][1] + 0.25f*_Q_accel_dtdt) * dt) * dt;
 	P[0][1] = P[0][1] + (P[1][1] + 0.5f*_Q_accel_dtdt) * dt;
@@ -59,7 +59,7 @@ void Altitude_KF::propagate(float_t acceleration, const float_t dt) {
 	P[1][1] = P[1][1] + _Q_accel_dtdt;
 }
 
-void Altitude_KF::update(float_t altitude, float_t R_altitude) {
+void Altitude_KF::update(float altitude, float R_altitude) {
 
 	// Observation vector 'zhat' from the current state estimate:
 	//
@@ -72,7 +72,7 @@ void Altitude_KF::update(float_t altitude, float_t R_altitude) {
 	// The innovation (or residual) is given by 'y = z - zhat', where 'z' is the actual observation i.e. measured state.
 
 	// Calculate innovation, in this particular case we observe the altitude state directly by an altitude measurement
-	float_t y = altitude - h;
+	float y = altitude - h;
 
 	// The innovation covariance is defined as 'S_k = H_k * P_k|k-1 * H'_k + R_k', for this particular case
 	// 'H_k * P_k|k-1 * H'_k' is equal to the first row first column element of 'P_k|k-1' i.e. P_00.
@@ -84,11 +84,16 @@ void Altitude_KF::update(float_t altitude, float_t R_altitude) {
 	//
 	// and 'S_k^-1' equals '1/S_k' since 'S_k^-1' is being a scalar (that is a good thing!).
 
+	
+	P[0][0] = this->q + P[0][0]; // MY CHANGE 
+		//P->estimated_error
+		//q->process_noise
+
 	// Calculate the inverse of the innovation covariance
-	float_t Sinv = 1.0f / (P[0][0] + R_altitude);
+	float Sinv = 1.0f / (P[0][0] + R_altitude);
 
 	// Calculate the Kalman gain
-	float_t K[2] = { P[0][0] * Sinv, P[1][0] * Sinv };
+	float K[2] = { P[0][0] * Sinv, P[1][0] * Sinv };
 
 	// Update the state estimate
 	h += K[0] * y;
