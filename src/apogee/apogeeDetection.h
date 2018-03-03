@@ -25,5 +25,6 @@ class SensApogee {
 		boolean_t apogeeDetection(int16_t accel_y);
 		int32_t getCorrectedAltitudeDoubleKF();
 		int32_t getCorrectedAltitudeSingleKF();
+		float_t getVelocityDoubleKF();
 
 };

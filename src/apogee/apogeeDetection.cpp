@@ -65,6 +65,11 @@ int32_t SensApogee::getCorrectedAltitudeSingleKF(){
 	return (int32_t) kalmanSingle->getValue()*100;
 }
 
+float_t SensApogee::getVelocityDoubleKF(){
+	return kalmanDouble->v;
+}
+
+
 
 /*boolean_t SensApogee::apogeeDetection(int32 accel_y){
 	kalman.propagate(accel_y - earth_gravity, dt);
