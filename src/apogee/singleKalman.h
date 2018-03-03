@@ -9,14 +9,14 @@
 class Kalman {
   private:
     /* Kalman filter variables */
-    int32_t q; //process noise covariance
-    int32_t r; //measurement noise covariance
-    int32_t x; //value
-    int32_t p; //estimation error covariance
-    int32_t k; //kalman gain
+    float_t q; //process noise covariance
+    float_t r; //measurement noise covariance
+    float_t x; //value
+    float_t p; //estimation error covariance
+    float_t k; //kalman gain
     
   public:
-    Kalman(int32_t process_noise, int32_t sensor_noise, int32_t estimated_error, int32_t intial_value) {
+    Kalman(float_t process_noise, float_t sensor_noise, float_t estimated_error, float_t intial_value) {
       /* The variables are x for the filtered value, q for the process noise, 
          r for the sensor noise, p for the estimated error and k for the Kalman Gain. 
          The state of the filter is defined by the values of these variables.
@@ -41,7 +41,7 @@ class Kalman {
         this->x = intial_value; //x will hold the iterated filtered value
     }
     
-    int32_t getFilteredValue(int32_t measurement) {
+    float_t getFilteredValue(float_t measurement) {
       /* Updates and gets the current measurement value */
       //prediction update
       //omit x = x
@@ -52,33 +52,33 @@ class Kalman {
       this->x = this->x + this->k * (measurement - this->x);
       this->p = (1 - this->k) * this->p;
       
-      return this->x;
+      return this->xa;
     }
     
-    void setParameters(int32_t process_noise, int32_t sensor_noise, int32_t estimated_error) {
+    void setParameters(float_t process_noise, float_t sensor_noise, float_t estimated_error) {
         this->q = process_noise;
         this->r = sensor_noise;
         this->p = estimated_error;
     }
 
-    void setParameters(int32_t process_noise, int32_t sensor_noise) {
+    void setParameters(float_t process_noise, float_t sensor_noise) {
         this->q = process_noise;
         this->r = sensor_noise;
     }
     
-    int32_t getProcessNoise() {
+    float_t getProcessNoise() {
       return this->q;
     }
     
-    int32_t getSensorNoise() {
+    float_t getSensorNoise() {
       return this->r;
     }
     
-    int32_t getEstimatedError() {
+    float_t getEstimatedError() {
       return this->p;
     }
 
-    int32_t getValue(){
+    float_t getValue(){
     	return this->x;
     }
 };
