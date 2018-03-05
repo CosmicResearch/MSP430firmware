@@ -16,15 +16,13 @@
 #ifndef BONDAR_POLLER
 #define BONDAR_POLLER
 
-#include "Senscape.h"
+#include "Bondar.h"
 #include "GPS.h"
 #include "Accelerometer.h"
 #include "Magnetometer.h"
 #include "Gyroscope.h"
 #include "Barometer.h"
 #include "SensTimer.h"
-#include "events.h"
-#include "Dispatcher.h"
 
 class Poller {
 

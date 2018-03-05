@@ -13,10 +13,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Bondar.h"
 #include "Poller.h"
-#include "Dispatcher.h"
 #include "printers/DebugPrinter.h"
-#include "events.h"
 #include "GPS.h"
 #include "SensADC.h"
 #include "actuators/PilotActuator.h"
@@ -31,7 +30,7 @@ Resource resy = Resource(ARBITER_ADC);
 Resource resz = Resource(ARBITER_ADC);
 
 SensADC adcx = SensADC(&resx,
-        ADC_CHANNEL_1,
+        ADC_CHANNEL_3,
         REFERENCE_AVcc_AVss,
         REFVOLT_LEVEL_NONE,
         SHT_SOURCE_ACLK,
@@ -49,7 +48,7 @@ SensADC adcy = SensADC(&resy,
         SAMPCON_SOURCE_SMCLK,
         SAMPCON_CLOCK_DIV_1);
 SensADC adcz = SensADC(&resz,
-        ADC_CHANNEL_3,
+        ADC_CHANNEL_1,
         REFERENCE_AVcc_AVss,
         REFVOLT_LEVEL_NONE,
         SHT_SOURCE_ACLK,
@@ -79,7 +78,7 @@ void setup(void) {
     dispatcher->subscribe(EVENT_SENSOR_INIT, printer);
     dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer);
     dispatcher->subscribe(EVENT_APOGEE, &mainActuator);
-    poller = Poller::createInstance(dispatcher, 50);
+    poller = Poller::createInstance(dispatcher, POLL_INTERVAL);
     /*TODO: attach sensors to the poller*/
     poller->attachGPS(&gps); //Baudrate should be 115200 and 10Hz freq
     poller->attachAccelerometer(&accel);
