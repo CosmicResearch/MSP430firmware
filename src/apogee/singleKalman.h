@@ -52,7 +52,7 @@ class Kalman {
       this->x = this->x + this->k * (measurement - this->x);
       this->p = (1 - this->k) * this->p;
       
-      return this->xa;
+      return this->x;
     }
     
     void setParameters(float_t process_noise, float_t sensor_noise, float_t estimated_error) {

@@ -11,11 +11,10 @@ uint8_t SensApogee::_apogee_delta_count = 5;
 uint8_t SensApogee::_apogee_velocity_counter = 5;
 
 
-SensApogee::SensApogee(float_t Q_accel, float_t R_altitude){
-	Altitude_KF K(Q_accel, R_altitude, 0.1);
-	Kalman myF(0.1,1,1023,0);
-	kalmanDouble = &K;
-	kalmanSingle = &myF;
+SensApogee::SensApogee(Altitude_KF* K, Kalman* myF){
+	//Kalman myF(0.1,1,1023,0);
+	kalmanDouble = K;
+	kalmanSingle = myF;
 }
 
 boolean_t SensApogee::apogeeDetectionDoubleKF(int32_t altitude, int16_t accel_y, float_t df){
@@ -41,7 +40,7 @@ boolean_t SensApogee::apogeeDetectionDoubleKF(int32_t altitude, int16_t accel_y,
 
 boolean_t SensApogee::apogeeDetectionSingleKF(int32_t altitude){
 	float_t newAlt = kalmanSingle->getFilteredValue((float_t) altitude / 100);
-
+	Debug.println(newAlt);
 	if (newAlt < _last_altitude) {
 		--_altitude_descending_count;
 		if (_apogee_pending and (_altitude_descending_count == 0)){
@@ -69,7 +68,9 @@ float_t SensApogee::getVelocityDoubleKF(){
 	return kalmanDouble->v;
 }
 
-
+boolean_t SensApogee::apogeeDetection(){
+	return (not this->_apogee_pending);
+}
 
 /*boolean_t SensApogee::apogeeDetection(int32 accel_y){
 	kalman.propagate(accel_y - earth_gravity, dt);
