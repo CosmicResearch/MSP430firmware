@@ -1,6 +1,8 @@
 # Bondar Avionics Firmware
 
-Firmware for the Bondar's avionic system. For using this software you will need access to Senscape's OS and libraries. At the moment we do not plan on releasing them. Senscape is an [Irideon](http://irideon.eu/) product.
+Firmware for the Bondar's avionic system. For using this software you will need access to Senscape's OS (SensOS) and libraries. Senscape is an [Irideon](http://irideon.eu/) product.
+
+SensOS (and all Senscape-related code) is distributed under Irideon's End-User Agreement, and is not free software.
 
 ## Build instructions
 
