@@ -13,37 +13,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BONDAR_MIDDLEWARE
-#define BONDAR_MIDDLEWARE
+#ifndef BONDAR_BONDAR
+#define BONDAR_BONDAR
 
-#include "Bondar.h"
+#include "Senscape.h"
 
-class Middleware : public Listener {
+#include "definitions.h"
+#include "events.h"
+#include "Middleware.h"
+#include "Actuator.h"
+#include "Printer.h"
+#include "Dispatcher.h"
 
-    /**
-     * 
-     * Middleware take data dispatched with events and transforms it or emits new events based on the data
-     * 
-     */
-
-public:
-
-    /**
-     * Any *expensive* operation should be done here and not in the constructor
-     * Returns: SUCCESS if it has been started or any error defined in error.h otherwise
-    */
-    virtual error_t start() = 0;
-
-    virtual error_t stop() = 0;
-
-    virtual bool isStarted() = 0;
-
-    /**
-     * event: one of the event codes defined in events.h
-     * data: pointer to data about the event or NULL
-    */ 
-    virtual void execute(Event event, void* data) = 0;
-
-};
 
 #endif
