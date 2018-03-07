@@ -16,19 +16,8 @@
 #ifndef BONDAR_MAIN_ACTUATOR
 #define BONDAR_MAIN_ACTUATOR
 
-#define PIN_MAIN 13
-#define PIN_MAIN_ALT 14
-
-#define PIN_MAIN_CONTINUITY_OUT 15
-#define PIN_MAIN_CONTINUITY_IN 16
-
-#define PIN_MAIN_CONTINUITY_OUT_ALT 17
-#define PIN_MAIN_CONTINUITY_IN_ALT 18
-
-#define ALTITUDE_MAIN 1000
-
-#include "../Actuator.h"
-#include "../Dispatcher.h"
+#include "Bondar.h"
+#include "Kalman.h"
 
 class MainActuator : public Actuator {
 
@@ -37,8 +26,6 @@ private:
     bool apogee;
 
     bool started;
-
-    bool checkContinuity(uint8_t pinOUT, uint8_t pinIN);
 
     bool openMain();
 
