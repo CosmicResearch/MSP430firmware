@@ -16,25 +16,13 @@
 #ifndef BONDAR_PILOT_ACTUATOR
 #define BONDAR_PILOT_ACTUATOR
 
-#define PIN_PILOT 7 //Change this pls
-#define PIN_PILOT_ALT 10
-
-#define PIN_PILOT_CONTINUITY_OUT 8
-#define PIN_PILOT_CONTINUITY_IN 9
-
-#define PIN_PILOT_CONTINUITY_OUT_ALT 11
-#define PIN_PILOT_CONTINUITY_IN_ALT 12
-
-#include "../Actuator.h"
-#include "../Dispatcher.h"
+#include "Bondar.h"
 
 class PilotActuator : public Actuator {
 
 private:
 
     bool started;
-
-    bool checkContinuity(uint8_t pinOUT, uint8_t pinIN);
 
 public:
 

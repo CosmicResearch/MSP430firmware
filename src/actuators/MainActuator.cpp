@@ -26,7 +26,6 @@ error_t MainActuator::start() {
     }
 
     pinMode(PIN_MAIN, OUTPUT);
-    pinMode(PIN_MAIN_ALT, OUTPUT);
 
     this->started = true;
     return SUCCESS;
@@ -49,9 +48,12 @@ void MainActuator::actuate(Event event, void* data) {
             this->apogee = true; //We don't want to open the chute before the apogee
             break;
         }
+
         case EVENT_READ_KALMAN: {
 
-            if (apogee && *((int*)data) <= ALTITUDE_MAIN) { //TODO: change this when the kalman filter is done
+            kalman_data_t* kalman_data = (kalman_data_t*) data;
+
+            if (apogee && kalman_data->altitude <= ALTITUDE_MAIN) {
 
                 bool mainOpen = this->openMain();
                 Dispatcher* dispatcher = Dispatcher::createInstance();
@@ -75,41 +77,6 @@ bool MainActuator::openMain() {
     digitalWrite(PIN_MAIN, HIGH);
     wait(100);
     digitalWrite(PIN_MAIN, LOW);
-
-    //check continuity. If we have continuity, the operation has failed and the parachute has not been fired
-    if (checkContinuity(PIN_MAIN_CONTINUITY_OUT, PIN_MAIN_CONTINUITY_IN)) {
-
-        //The first igniter has continuity, this means it hasn't been fired
-        //Let's try to open the main with the second igniter
-
-        digitalWrite(PIN_MAIN_ALT, HIGH);
-        wait(100);
-        digitalWrite(PIN_MAIN_ALT, LOW);
-
-        if (checkContinuity(PIN_MAIN_CONTINUITY_OUT_ALT, PIN_MAIN_CONTINUITY_IN_ALT)) {
-            return false;
-        }
-
-    }
-
     return true;
-
-}
-
-bool MainActuator::checkContinuity(uint8_t pinOUT, uint8_t pinIN) {
-
-    bool res;
-
-    pinMode(pinOUT, OUTPUT);
-    pinMode(pinIN, INPUT);
-
-    digitalWrite(pinOUT, HIGH);
-    wait(10);
-
-    res = digitalRead(pinIN);
-
-    digitalWrite(pinOUT, LOW);
-
-    return res;
 }
 

@@ -28,7 +28,6 @@ error_t PilotActuator::start() {
     }
 
     pinMode(PIN_PILOT, OUTPUT);
-    pinMode(PIN_PILOT_ALT, OUTPUT);
     this->started = true;
     return SUCCESS;
 
@@ -49,49 +48,17 @@ bool PilotActuator::isStarted() {
 
 void PilotActuator::actuate(Event event, void* data) {
 
+    if (!started) {
+        return;
+    }
+
     if (event == EVENT_APOGEE) {
         digitalWrite(PIN_PILOT, HIGH);
         wait(100);
         digitalWrite(PIN_PILOT, LOW);
 
-        //check continuity. If we have continuity, the operation has failed and the parachute has not been fired
-
-        if (this->checkContinuity(PIN_PILOT_CONTINUITY_OUT, PIN_PILOT_CONTINUITY_IN)) {
-
-            //The first igniter has continuity, this means it hasn't been fired
-            //Let's try to open the pilot with the second igniter
-
-            digitalWrite(PIN_PILOT_ALT, HIGH);
-            wait(100);
-            digitalWrite(PIN_PILOT_ALT, LOW);
-
-            if (this->checkContinuity(PIN_PILOT_CONTINUITY_OUT_ALT, PIN_PILOT_CONTINUITY_IN_ALT)) {
-                Dispatcher* dispatcher = Dispatcher::createInstance();
-                dispatcher->dispatch(EVENT_ERROR_PILOT, data); //SHEEET. The pilot has not been fired
-                return;
-            }
-
-        }
-
         Dispatcher* dispatcher = Dispatcher::createInstance();
         dispatcher->dispatch(EVENT_PILOT_FIRED, data);
     }
-}
-
-bool PilotActuator::checkContinuity(uint8_t pinOUT, uint8_t pinIN) {
-
-    bool res;
-
-    pinMode(pinOUT, OUTPUT);
-    pinMode(pinIN, INPUT);
-
-    digitalWrite(pinOUT, HIGH);
-    wait(10);
-
-    res = digitalRead(pinIN);
-
-    digitalWrite(pinOUT, LOW);
-
-    return res;
 }
 
