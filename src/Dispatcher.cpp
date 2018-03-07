@@ -24,6 +24,7 @@ Dispatcher::Dispatcher() {
             this->printers[i][j] = NULL;
             this->middleware[i][j] = NULL;
         }
+        this->running[i] = 0;
         this->actuators_index[i] = 0;
         this->printers_index[i] = 0;
         this->middleware_index[i] = 0;
@@ -141,6 +142,7 @@ void Dispatcher::dispatch(Event event, void* data) {
             eventStruct->data = data;
             eventStruct->listener = (Listener*)this->middleware[event][i];
             postTask(Dispatcher::middlewareTask, eventStruct);
+            ++running[event];
         }
         if (this->actuators[event][i] != NULL) {
             event_t* eventStruct = new event_t;
@@ -148,6 +150,7 @@ void Dispatcher::dispatch(Event event, void* data) {
             eventStruct->data = data;
             eventStruct->listener = (Listener*)this->actuators[event][i];
             postTask(Dispatcher::actuatorTask, eventStruct);
+            ++running[event];
         }
         if (this->printers[event][i] != NULL) {
             event_t* eventStruct = new event_t;
@@ -155,6 +158,7 @@ void Dispatcher::dispatch(Event event, void* data) {
             eventStruct->data = data;
             eventStruct->listener = (Listener*)this->printers[event][i];
             postTask(Dispatcher::printerTask, eventStruct);
+            ++running[event];
         }
     }
 }
@@ -166,8 +170,11 @@ void Dispatcher::dispatch(Event event, void* data) {
 void Dispatcher::printerTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
+    Dispatcher::createInstance()->markStoppedRunning(eventData.event);
 #ifndef __TEST__
-    delete ((event_t*)eventStruct)->data;
+    if (Dispatcher::createInstance()->getRunning(eventData.event) <= 0) {
+        safeDeleteEventData(eventData.event, ((event_t*)eventStruct)->data);
+    }
     delete (event_t*)eventStruct;
 #endif
 }
@@ -175,8 +182,11 @@ void Dispatcher::printerTask(void* eventStruct) {
 void Dispatcher::actuatorTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
+    Dispatcher::createInstance()->markStoppedRunning(eventData.event);
 #ifndef __TEST__
-    delete ((event_t*)eventStruct)->data;
+    if (Dispatcher::createInstance()->getRunning(eventData.event) <= 0) {
+        safeDeleteEventData(eventData.event, ((event_t*)eventStruct)->data);
+    }
     delete (event_t*)eventStruct;
 #endif
 }
@@ -184,8 +194,21 @@ void Dispatcher::actuatorTask(void* eventStruct) {
 void Dispatcher::middlewareTask(void* eventStruct) {
     event_t eventData = *((event_t*) eventStruct);
     ((Middleware*)eventData.listener)->execute(eventData.event, eventData.data);
+    Dispatcher::createInstance()->markStoppedRunning(eventData.event);
 #ifndef __TEST__
-    delete ((event_t*)eventStruct)->data;
+    if (Dispatcher::createInstance()->getRunning(eventData.event) <= 0) {
+        safeDeleteEventData(eventData.event, ((event_t*)eventStruct)->data);
+    }
     delete (event_t*)eventStruct;
 #endif
+}
+
+void Dispatcher::markStoppedRunning(Event e) {
+    if (running[e] > 0) {
+        --running[e];
+    }
+}
+
+uint8_t Dispatcher::getRunning(Event e) {
+    return running[e];
 }
