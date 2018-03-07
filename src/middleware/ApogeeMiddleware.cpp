@@ -20,8 +20,6 @@ ApogeeMiddleware::ApogeeMiddleware(float_t Q_accel, float_t R_altitude) {
     this->started = false;
     this->Q_accel = Q_accel;
     this->R_altitude = R_altitude;
-    this->lastAccelData = new adc_channel_data_t;
-    this->lastGPSData = new gps_data_t;
     this->apogeeDetected = false;
     this->gpsValid = false;
     this->accelValid = false;
@@ -35,6 +33,9 @@ error_t ApogeeMiddleware::start() {
     }
 
     this->apogeeDetection = new SensApogee(new Altitude_KF(Q_ACCEL, R_ALTITUDE, PROCESS_NOISE), new Kalman(PROCESS_NOISE, SENSOR_NOISE, ESTIMATED_ERROR, INITIAL_VALUE));
+
+    this->lastAccelData = new adxl377_data_t;
+    this->lastGPSData = new gps_data_t;
 
     this->started = true;
 
