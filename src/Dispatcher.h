@@ -35,9 +35,15 @@ private:
     Printer* printers[N_MAX_EVENTS][N_PER_EVENT];
     Middleware* middleware[N_MAX_EVENTS][N_PER_EVENT];
 
+    uint8_t running[N_MAX_EVENTS];
+    void* dataToDelete[N_MAX_EVENTS][5];
+
     uint16_t actuators_index[N_MAX_EVENTS];
     uint16_t printers_index[N_MAX_EVENTS];
     uint16_t middleware_index[N_MAX_EVENTS];
+
+    uint8_t getRunning(Event e);
+    void markStoppedRunning(Event e);
 
     Dispatcher();
 
