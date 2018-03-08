@@ -1,10 +1,12 @@
 #include "SensorFusion.h"
 
+
+SensFusion::SensFusion(){};
 /*
 Populates the .pitch/.roll fields in the sensors_vec_t struct
 with the right angular data (in degree)
 */
-boolean_t SensFusion::accelGetdata(adxl377_data_t *accel, sensfusion_data_t *data){
+boolean_t SensFusion::accelGetOrientation(adxl377_data_t *accel, sensfusion_data_t *data){
 	if (accel == NULL) return false;
 	if (data == NULL) return false;
 
@@ -30,25 +32,25 @@ boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, 
   	if (accel == NULL) return false;
 
 	float_t  accel_X, accel_Y, accel_Z;
-	float_t  *mag_X, *mag_Y, *mag_Z;
+	int16_t  *mag_X, *mag_Y, *mag_Z;
 
 	switch (axis){
 
 		case SENSOR_AXIS_X:
 		  /* The X-axis is parallel to the gravity */
-		  accel_X = accel->chany;
-		  accel_Y = accel->chanz;
-		  accel_Z = accel->chanx;
-		  mag_X = &(mag->y);
-		  mag_Y = &(mag->z);
-		  mag_Z = &(mag->x);
+		  accel_X = accel->_chany;
+		  accel_Y = accel->_chanz;
+		  accel_Z = accel->_chanx;
+		  mag_X = &mag->y;
+		  mag_Y = &mag->z;
+		  mag_Z = &mag->x;
 		  break;
 
 		case SENSOR_AXIS_Y:
 		  /* The Y-axis is parallel to the gravity */
-		  accel_X = accel->chany;
-		  accel_Y = accel->chanx;
-		  accel_Z = accel->chany;
+		  accel_X = accel->_chany;
+		  accel_Y = accel->_chanx;
+		  accel_Z = accel->_chany;
 		  mag_X = &(mag->z);
 		  mag_Y = &(mag->x);
 		  mag_Z = &(mag->y);
@@ -56,9 +58,9 @@ boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, 
 
 		case SENSOR_AXIS_Z:
 		  /* The Z-axis is parallel to the gravity */
-		  accel_X = accel->chanx;
-		  accel_Y = accel->chany;
-		  accel_Z = accel->chany;
+		  accel_X = accel->_chanx;
+		  accel_Y = accel->_chany;
+		  accel_Z = accel->_chany;
 		  mag_X = &(mag->x);
 		  mag_Y = &(mag->y);
 		  mag_Z = &(mag->z);
@@ -69,10 +71,10 @@ boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, 
 	}
 
 	float_t t_roll = accel_X * accel_X + accel_Z * accel_Z;
-	float_t rollRadians = (float_t )atan2(accel_Y, sqrt(t_roll));
+	float_t rollRadians = (float_t) atan2(accel_Y, sqrt(t_roll));
 
 	float_t t_pitch = accel_Y * accel_Y + accel_Z * accel_Z;
-	float_t pitchRadians = (float_t )atan2(accel_X, sqrt(t_pitch));
+	float_t pitchRadians = (float_t) atan2(accel_X, sqrt(t_pitch));
 
 	float_t cosRoll = (float_t )cos(rollRadians);
 	float_t sinRoll = (float_t )sin(rollRadians);
@@ -105,21 +107,21 @@ boolean_t magGetOrientation(sensaxis_t axis, lsm9ds0_data_t* mag, sensfusion_dat
 		  /* Sensor rotates around X-axis                                                                 */
 		  /* "heading" is the angle between the 'Y axis' and magnetic north on the horizontal plane (Oyz) */
 		  /* heading = atan(Mz / My)                                                                      */
-		  data->heading = (float_t tan2(mag->z, mag->y) * 180 / PI;
+		  data->heading = (float_t) atan2(mag->z, mag->y) * 180 / PI;
 		  break;
 
 		case SENSOR_AXIS_Y:
 		  /* Sensor rotates around Y-axis                                                                 */
 		  /* "heading" is the angle between the 'Z axis' and magnetic north on the horizontal plane (Ozx) */
 		  /* heading = atan(Mx / Mz)                                                                      */
-		  data->heading = (float_t tan2(mag->x, mag->z) * 180 / PI;
+		  data->heading = (float_t) atan2(mag->x, mag->z) * 180 / PI;
 		  break;
 
 		case SENSOR_AXIS_Z:
 		  /* Sensor rotates around Z-axis                                                                 */
 		  /* "heading" is the angle between the 'X axis' and magnetic north on the horizontal plane (Oxy) */
 		  /* heading = atan(My / Mx)                                                                      */
-		  data->heading = (float_t tan2(mag->y, mag->x) * 180 / PI;
+		  data->heading = (float_t) atan2(mag->y, mag->x) * 180 / PI;
 		  break;
 
 		default:
@@ -159,7 +161,7 @@ boolean_t fusionGetOrientation(adxl377_data_t* accel, lsm9ds0_data_t* mag, sensf
 	/*                    z                                                                           */
 	/*                                                                                                */
 	/* where:  y, z are returned value from accelerometer sensor                                      */
-	data->roll = (float_t tan2(accel->_chany, accel->_chanz);
+	data->roll = (float_t) atan2(accel->_chany, accel->_chanz);
 
 	/* pitch: Rotation around the Y-axis. -180 <= roll <= 180                                         */
 	/* a positive pitch angle is defined to be a clockwise rotation about the positive Y-axis         */
@@ -169,11 +171,11 @@ boolean_t fusionGetOrientation(adxl377_data_t* accel, lsm9ds0_data_t* mag, sensf
 	/*                    y * sin(roll) + z * cos(roll)                                               */
 	/*                                                                                                */
 	/* where:  x, y, z are returned value from accelerometer sensor                                   */
-	if (accel->_chany * sin(orientation->roll) + accel->_chanz * cos(data->roll) == 0)
+	if (accel->_chany * sin(data->roll) + accel->_chanz * cos(data->roll) == 0)
 		data->pitch = accel->_chanx > 0 ? (PI / 2) : (-PI / 2);
 	else
-		data->pitch = (float_t tan(-accel->_chanx / (accel->_chany * sin(data->roll) + \
-	                                                                 accel->_chan.z * cos(data->roll)));
+		data->pitch = (float_t) atan(-accel->_chanx / (accel->_chany * sin(data->roll) + accel->_chanz * cos(data->roll)));
+
 
 	/* heading: Rotation around the Z-axis. -180 <= roll <= 180                                       */
 	/* a positive heading angle is defined to be a clockwise rotation about the positive Z-axis       */
@@ -183,16 +185,16 @@ boolean_t fusionGetOrientation(adxl377_data_t* accel, lsm9ds0_data_t* mag, sensf
 	/*                    x * cos(pitch) + y * sin(pitch) * sin(roll) + z * sin(pitch) * cos(roll))   */
 	/*                                                                                                */
 	/* where:  x, y, z are returned value from magnetometer sensor                                    */
-	data->heading = (float_t tan2(mag->z * sin(data->roll) - mag->y * cos(data->roll), \
+	data->heading = (float_t) atan2(mag->z * sin(data->roll) - mag->y * cos(data->roll), \
 	                                  mag->x * cos(data->pitch) + \
 	                                  mag->y * sin(data->pitch) * sin(data->roll) + \
 	                                  mag->z * sin(data->pitch) * cos(data->roll));
 
 
 	/* Convert angular data to degree */
-	data->roll = data->roll * 180 / PI_F;
-	data->pitch = data->pitch * 180 / PI_F;
-	data->heading = data->heading * 180 / PI_F;
+	data->roll = data->roll * 180 / PI;
+	data->pitch = data->pitch * 180 / PI;
+	data->heading = data->heading * 180 / PI;
 
 	return true;
 }
