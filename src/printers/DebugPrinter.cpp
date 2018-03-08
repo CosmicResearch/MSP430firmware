@@ -17,8 +17,9 @@
 #include "GPS.h"
 #include "Accelerometer.h"
 
-DebugPrinter::DebugPrinter() {
+DebugPrinter::DebugPrinter(uint8_t id) {
     this->started = false;
+    this->id = id;
 }
 
 error_t DebugPrinter::start() {
@@ -43,6 +44,7 @@ bool DebugPrinter::isStarted() {
 }
 
 void DebugPrinter::print(Event event, void* data) {
+    Debug.print("Im").println((int)id);
     if (!this->started) {
         return;
     }
@@ -64,7 +66,7 @@ void DebugPrinter::print(Event event, void* data) {
         case EVENT_READ_ACCELEROMETER : {
             Debug.println("Received accelerometer data");
             adxl377_data_t accel_data = *((adxl377_data_t*)data);
-            Debug.print("x: ").print(accel_data._chanx).print(" y: ").print(accel_data._chany).print(" z: ").println(accel_data._chanz);
+            Debug.print("x: ").print(accel_data._chanx*0.1f*9.80665f).print("m/s^2 y: ").print(accel_data._chany*0.1*9.80665f).print("m/s^2 z: ").print(accel_data._chanz*0.1f*9.80665f).println("m/s^2");
             break;
         }
         case EVENT_SENSOR_INIT: {

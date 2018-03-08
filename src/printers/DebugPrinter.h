@@ -24,10 +24,11 @@ class DebugPrinter : public Printer {
 private:
 
     bool started;
+    uint8_t id;
 
 public:
 
-    DebugPrinter();
+    DebugPrinter(uint8_t id);
 
     virtual error_t start();
 
