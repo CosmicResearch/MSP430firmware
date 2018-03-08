@@ -22,7 +22,8 @@
 
 Poller* poller;
 Dispatcher* dispatcher;
-DebugPrinter* printer = new DebugPrinter();
+DebugPrinter* printer = new DebugPrinter(0);
+DebugPrinter* printer2 = new DebugPrinter(1);
 PilotActuator mainActuator = PilotActuator();
 
 Resource resx = Resource(ARBITER_ADC);
@@ -77,10 +78,16 @@ void setup(void) {
     dispatcher->subscribe(EVENT_READ_ACCELEROMETER, printer);
     dispatcher->subscribe(EVENT_SENSOR_INIT, printer);
     dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer);
+
+    dispatcher->subscribe(EVENT_READ_GPS, printer2);
+    dispatcher->subscribe(EVENT_READ_ACCELEROMETER, printer2);
+    dispatcher->subscribe(EVENT_SENSOR_INIT, printer2);
+    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer2);
+
     dispatcher->subscribe(EVENT_APOGEE, &mainActuator);
     poller = Poller::createInstance(dispatcher, POLL_INTERVAL);
     /*TODO: attach sensors to the poller*/
-    poller->attachGPS(&gps); //Baudrate should be 115200 and 10Hz freq
+    //poller->attachGPS(&gps); //Baudrate should be 115200 and 10Hz freq
     poller->attachAccelerometer(&accel);
     poller->start();
 }

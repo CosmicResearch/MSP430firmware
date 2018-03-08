@@ -24,10 +24,14 @@ Dispatcher::Dispatcher() {
             this->printers[i][j] = NULL;
             this->middleware[i][j] = NULL;
         }
-        this->running[i] = 0;
         this->actuators_index[i] = 0;
         this->printers_index[i] = 0;
         this->middleware_index[i] = 0;
+    }
+    for (int i = 0; i < MAX_NUMBER_OF_TASKS_PER_DEVICE; ++i) {
+        processes[i].event = 0;
+        processes[i].data = NULL;
+        processes[i].n_running = 0;
     }
     this->started = false;
 }
@@ -123,6 +127,19 @@ void Dispatcher::subscribe(Event event, Middleware* middleware) {
     ++(this->middleware_index[event]);
 }
 
+uint8_t Dispatcher::findFirstEventProcess(boolean_t& found) {
+    uint8_t process_id;
+    found = false;
+    uint8_t process_index = 0;
+    while (process_index < MAX_NUMBER_OF_TASKS_PER_DEVICE && !found) {
+        if (processes[process_index].n_running == 0) {
+            process_id = process_index;
+            found = true;
+        }
+        ++process_index;
+    }
+    return process_index;
+}
 
 /**
  * Dispatch methods
@@ -135,30 +152,38 @@ void Dispatcher::dispatch(Event event, void* data) {
     if (!this->started) {
         return;
     }
+
+    boolean_t process_available;
+    uint8_t process_index = findFirstEventProcess(process_available);
+
+    if (!process_available) {
+        return; //We can't spawn new tasks :(
+    }
+
+    processes[process_index].event = event;
+    processes[process_index].data = data;
+
     for (int i = 0; i < N_PER_EVENT; ++i) {
         if (this->middleware[event][i] != NULL) {
-            event_t* eventStruct = new event_t;
-            eventStruct->event = event;
-            eventStruct->data = data;
+            event_task_t* eventStruct = new event_task_t;
+            eventStruct->process_id = process_index;
             eventStruct->listener = (Listener*)this->middleware[event][i];
             postTask(Dispatcher::middlewareTask, eventStruct);
-            ++running[event];
+            ++(processes[process_index].n_running);
         }
         if (this->actuators[event][i] != NULL) {
-            event_t* eventStruct = new event_t;
-            eventStruct->event = event;
-            eventStruct->data = data;
+            event_task_t* eventStruct = new event_task_t;
+            eventStruct->process_id = process_index;
             eventStruct->listener = (Listener*)this->actuators[event][i];
             postTask(Dispatcher::actuatorTask, eventStruct);
-            ++running[event];
+            ++(processes[process_index].n_running);
         }
         if (this->printers[event][i] != NULL) {
-            event_t* eventStruct = new event_t;
-            eventStruct->event = event;
-            eventStruct->data = data;
+            event_task_t* eventStruct = new event_task_t;
+            eventStruct->process_id = process_index;
             eventStruct->listener = (Listener*)this->printers[event][i];
             postTask(Dispatcher::printerTask, eventStruct);
-            ++running[event];
+            ++(processes[process_index].n_running);
         }
     }
 }
@@ -168,47 +193,41 @@ void Dispatcher::dispatch(Event event, void* data) {
  */
 
 void Dispatcher::printerTask(void* eventStruct) {
-    event_t eventData = *((event_t*) eventStruct);
-    ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
-    Dispatcher::createInstance()->markStoppedRunning(eventData.event);
-#ifndef __TEST__
-    if (Dispatcher::createInstance()->getRunning(eventData.event) <= 0) {
-        safeDeleteEventData(eventData.event, ((event_t*)eventStruct)->data);
-    }
-    delete (event_t*)eventStruct;
-#endif
+    event_task_t event_data = *((event_task_t*) eventStruct);
+    const process_t process_data = Dispatcher::createInstance()->getProcessData(event_data.process_id);
+    ((Printer*)event_data.listener)->print(process_data.event, process_data.data);
+    Dispatcher::createInstance()->markStoppedRunning(event_data.process_id);
+    delete (event_task_t*)eventStruct;
 }
 
 void Dispatcher::actuatorTask(void* eventStruct) {
-    event_t eventData = *((event_t*) eventStruct);
-    ((Printer*)eventData.listener)->print(eventData.event, eventData.data);
-    Dispatcher::createInstance()->markStoppedRunning(eventData.event);
-#ifndef __TEST__
-    if (Dispatcher::createInstance()->getRunning(eventData.event) <= 0) {
-        safeDeleteEventData(eventData.event, ((event_t*)eventStruct)->data);
-    }
-    delete (event_t*)eventStruct;
-#endif
+    event_task_t event_data = *((event_task_t*) eventStruct);
+    const process_t process_data = Dispatcher::createInstance()->getProcessData(event_data.process_id);
+    ((Actuator*)event_data.listener)->actuate(process_data.event, process_data.data);
+    Dispatcher::createInstance()->markStoppedRunning(event_data.process_id);
+    delete (event_task_t*)eventStruct;
 }
 
 void Dispatcher::middlewareTask(void* eventStruct) {
-    event_t eventData = *((event_t*) eventStruct);
-    ((Middleware*)eventData.listener)->execute(eventData.event, eventData.data);
-    Dispatcher::createInstance()->markStoppedRunning(eventData.event);
-#ifndef __TEST__
-    if (Dispatcher::createInstance()->getRunning(eventData.event) <= 0) {
-        safeDeleteEventData(eventData.event, ((event_t*)eventStruct)->data);
-    }
-    delete (event_t*)eventStruct;
-#endif
+    event_task_t event_data = *((event_task_t*) eventStruct);
+    const process_t process_data = Dispatcher::createInstance()->getProcessData(event_data.process_id);
+    ((Middleware*)event_data.listener)->execute(process_data.event, process_data.data);
+    Dispatcher::createInstance()->markStoppedRunning(event_data.process_id);
+    delete (event_task_t*)eventStruct;
 }
 
-void Dispatcher::markStoppedRunning(Event e) {
-    if (running[e] > 0) {
-        --running[e];
+void Dispatcher::markStoppedRunning(uint8_t process_id) {
+    if (processes[process_id].n_running > 0) {
+        --processes[process_id].n_running;
+        if (processes[process_id].n_running == 0) {
+            safeDeleteEventData(processes[process_id].event, processes[process_id].data);
+        }
     }
 }
 
-uint8_t Dispatcher::getRunning(Event e) {
-    return running[e];
+const process_t Dispatcher::getProcessData(uint8_t process_id) {
+    if (process_id >= MAX_NUMBER_OF_TASKS_PER_DEVICE) {
+        return process_t();
+    }
+    return processes[process_id];
 }

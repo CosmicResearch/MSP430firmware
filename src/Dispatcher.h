@@ -35,14 +35,14 @@ private:
     Printer* printers[N_MAX_EVENTS][N_PER_EVENT];
     Middleware* middleware[N_MAX_EVENTS][N_PER_EVENT];
 
-    uint8_t running[N_MAX_EVENTS];
+    process_t processes[MAX_NUMBER_OF_TASKS_PER_DEVICE];
 
     uint16_t actuators_index[N_MAX_EVENTS];
     uint16_t printers_index[N_MAX_EVENTS];
     uint16_t middleware_index[N_MAX_EVENTS];
 
-    uint8_t getRunning(Event e);
-    void markStoppedRunning(Event e);
+    void markStoppedRunning(uint8_t process_id);
+    const process_t getProcessData(uint8_t process_id);
 
     Dispatcher();
 
@@ -51,6 +51,8 @@ private:
     static void printerTask(void* eventStruct);
     static void actuatorTask(void* eventStruct);
     static void middlewareTask(void* eventStruct);
+
+    uint8_t findFirstEventProcess(boolean_t& found);
 
 public:
 
