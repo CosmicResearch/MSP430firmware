@@ -29,11 +29,19 @@
 typedef int8_t Event;
 
 
-// postTask() only allows 1 parameter, this struct was created to circumvent this limitation
+/**
+ * One process is a group of tasks, and process an event and its data through the tasks.
+ * Every task is linked to a `Listener`.
+ */
 
-struct event_t {
+struct process_t {
     Event event;
     void* data;
+    uint8_t n_running;
+};
+
+struct event_task_t {
+    uint8_t process_id;
     Listener* listener;
 };
 
@@ -95,61 +103,6 @@ struct event_t {
 #define SENSOR_MAGNETOMETER 3
 #define SENSOR_BAROMETER 4
 
-void safeDeleteEventData(Event e, void* data) {
-    if (data == NULL) {
-        return;
-    }
-    switch (e) {
-
-        case EVENT_READ_GPS: {
-            gps_data_t* gps_data = (gps_data_t*)data;
-            delete gps_data;
-            break;
-        }
-        case EVENT_READ_ACCELEROMETER: {
-            adxl377_data_t* accel_data = (adxl377_data_t*) data;
-            delete accel_data;
-            break;
-        }
-
-        case EVENT_READ_MAGNETOMETER: {
-            lsm9ds0_data_t* mag_data = (lsm9ds0_data_t*) data;
-            delete mag_data;
-            break;
-        }
-
-        case EVENT_READ_GYROSCOPE: {
-            lsm9ds0gyro_data_t* gyro_data = (lsm9ds0gyro_data_t*) data;
-            delete gyro_data;
-            break;
-        }
-
-        case EVENT_READ_BAROMETER: {
-            bmp280_data_comp_t* bar_data = (bmp280_data_comp_t*) data;
-            delete bar_data;
-            break;
-        }
-        case EVENT_READ_KALMAN:
-        case EVENT_APOGEE:
-        case EVENT_MAIN_FIRED:
-        case EVENT_PILOT_FIRED:
-        case EVENT_LIFTOFF:
-        case EVENT_SUPERSONIC_STARTED:
-        case EVENT_SUPERSONIC_ENDED:
-        case EVENT_ERROR_PILOT:
-        case EVENT_ERROR_MAIN: {
-            kalman_data_t* kalman_data = (kalman_data_t*) data;
-            delete kalman_data;
-            break;
-        }
-        case EVENT_ERROR_SENSOR_INIT:
-        case EVENT_ERROR_SENSOR_READ: {
-            uint8_t* uid = (uint8_t*) data;
-            delete uid;
-            break;
-        }
-
-    }
-}
+void safeDeleteEventData(Event e, void* data);
 
 #endif

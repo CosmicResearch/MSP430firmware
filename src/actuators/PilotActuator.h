@@ -39,4 +39,4 @@ public:
 
 };
 
-#endif /* SRC_ACTUATORS_MAINACTUATOR_H_ */
+#endif
