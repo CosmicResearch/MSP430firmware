@@ -20,6 +20,8 @@ boolean_t detected;
 boolean_t once;
 
 int32_t alt[33];
+float_t alt_SK[33];
+float_t alt_DK[33];
 
 void singleExecution();
 
@@ -27,7 +29,7 @@ void setup(void) {
 	Debug.begin();
 
 	// TOSO F("...")
-	Debug.println("AAPOGEE_03 example - Test More Data with Double Kalman");
+	Debug.println("APOGEE_05 example - Test More Data with both Kalman");
 	Debug.println();
 	once = false;
 	alt[0] = -2383.319; alt[1] =  53885.231; alt[2] = 101207.937;
@@ -52,14 +54,32 @@ void loop(void) {
 	}
 }
 
+void printAltitude(float_t* alt){
+	for (int i = 0; i < 33; ++i){
+		Debug.print(alt[i]*).println("m ");
+	}
+}
+
 void singleExecution(){
 	for (int i = 0; i < 33; ++i){
-		if (AP.apogeeDetectionDoubleKF(alt[i])) {
-			Debug.print("Apogee detected at altitude: ").print((float_t) AP.getCorrectedAltitudeDoubleKF()/100).print("m ");
+		boolean_t SK = AP.apogeeDetectionSingleKF(alt[i]);
+		boolean_t DK = AP.apogeeDetectionDoubleKF(alt[i]);
+		alt_SK[i] = (float_t) AP.getCorrectedAltitudeSingleKF()/100;
+		alt_DK[i] = (float_t) AP.getCorrectedAltitudeDoubleKF()/100;
+		if (SK) {
+			Debug.print("Apogee detected by Single Kalman at altitude: ").print(alt_SK[i]).println("m ");
 		}
-		else{
-			Debug.print((float_t) AP.getCorrectedAltitudeDoubleKF()/100).print("m ");
+
+		if (DK){
+			Debug.print("Apogee detected by Double Kalman at altitude: ").print(alt_DK[i]).print("m ");
 		}
-		Debug.print(AP.getVelocityDoubleKF()).println(" m/s");
+		Debug.println("-----------------------------------------------------------------------------------");
+		Debug.println("Single Kalman altitudes:");
+		printAltitude(&alt_SK);
+		Debug.println("-----------------------------------------------------------------------------------");
+		Debug.println("Double Kalman altitudes:");
+		printAltitude(&alt_DK);
 	}
+
+
 }

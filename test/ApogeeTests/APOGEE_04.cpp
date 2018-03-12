@@ -27,7 +27,7 @@ void setup(void) {
 	Debug.begin();
 
 	// TOSO F("...")
-	Debug.println("AAPOGEE_03 example - Test More Data with Double Kalman");
+	Debug.println("APOGEE_04 example - Test More Data with Single Kalman");
 	Debug.println();
 	once = false;
 	alt[0] = -2383.319; alt[1] =  53885.231; alt[2] = 101207.937;
@@ -54,12 +54,11 @@ void loop(void) {
 
 void singleExecution(){
 	for (int i = 0; i < 33; ++i){
-		if (AP.apogeeDetectionDoubleKF(alt[i])) {
-			Debug.print("Apogee detected at altitude: ").print((float_t) AP.getCorrectedAltitudeDoubleKF()/100).print("m ");
+		if (AP.apogeeDetectionSingleKF(alt[i])) {
+			Debug.print("Apogee detected at altitude: ").print((float_t) AP.getCorrectedAltitudeSingleKF()/100).print("m ");
 		}
 		else{
-			Debug.print((float_t) AP.getCorrectedAltitudeDoubleKF()/100).print("m ");
+			Debug.print((float_t) AP.getCorrectedAltitudeSingleKF()/100).print("m ");
 		}
-		Debug.print(AP.getVelocityDoubleKF()).println(" m/s");
 	}
 }
