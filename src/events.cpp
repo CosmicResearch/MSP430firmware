@@ -71,3 +71,61 @@ void safeDeleteEventData(Event e, void* data) {
 
     }
 }
+
+uint32_t eventDataSize(Event e, void* data) {
+    if (data == NULL) {
+            return 0;
+        }
+        uint32_t res = 0;
+        switch (e) {
+
+            case EVENT_READ_GPS: {
+                gps_data_t* gps_data = (gps_data_t*)data;
+                res = sizeof(gps_data);
+                break;
+            }
+            case EVENT_READ_ACCELEROMETER: {
+                adxl377_data_t* accel_data = (adxl377_data_t*) data;
+                res = sizeof(accel_data);
+                break;
+            }
+
+            case EVENT_READ_MAGNETOMETER: {
+                lsm9ds0_data_t* mag_data = (lsm9ds0_data_t*) data;
+                res = sizeof(mag_data);
+                break;
+            }
+
+            case EVENT_READ_GYROSCOPE: {
+                lsm9ds0gyro_data_t* gyro_data = (lsm9ds0gyro_data_t*) data;
+                res = sizeof(gyro_data);
+                break;
+            }
+
+            case EVENT_READ_BAROMETER: {
+                bmp280_data_comp_t* bar_data = (bmp280_data_comp_t*) data;
+                res = sizeof(bar_data);
+                break;
+            }
+            case EVENT_READ_KALMAN:
+            case EVENT_APOGEE:
+            case EVENT_MAIN_FIRED:
+            case EVENT_PILOT_FIRED:
+            case EVENT_LIFTOFF:
+            case EVENT_SUPERSONIC_STARTED:
+            case EVENT_SUPERSONIC_ENDED:
+            case EVENT_ERROR_PILOT:
+            case EVENT_ERROR_MAIN: {
+                kalman_data_t* kalman_data = (kalman_data_t*) data;
+                res = sizeof(kalman_data);
+                break;
+            }
+            case EVENT_ERROR_SENSOR_INIT:
+            case EVENT_ERROR_SENSOR_READ: {
+                uint8_t* uid = (uint8_t*) data;
+                res = sizeof(uid);
+                break;
+            }
+
+        }
+}
