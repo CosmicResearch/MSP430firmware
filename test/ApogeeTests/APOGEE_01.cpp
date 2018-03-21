@@ -26,7 +26,7 @@ void setup(void) {
 	Debug.begin();
 
 	// TOSO F("...")
-	Debug.println("AAPOGEE_01 example - Test basic detection");
+	Debug.println("APOGEE_01 example - Test basic detection with Single Kalman");
 	Debug.println();
 	once = false;
 

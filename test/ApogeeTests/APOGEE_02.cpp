@@ -26,7 +26,7 @@ void setup(void) {
 	Debug.begin();
 
 	// TOSO F("...")
-	Debug.println("AAPOGEE_02 example - Test Double basic Detection");
+	Debug.println("APOGEE_02 example - Test basic Detection with Double Kalman");
 	Debug.println();
 	once = false;
 
