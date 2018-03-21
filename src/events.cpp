@@ -128,4 +128,5 @@ uint32_t eventDataSize(Event e, void* data) {
             }
 
         }
+        return res;
 }
