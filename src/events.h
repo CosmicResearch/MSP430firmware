@@ -104,5 +104,6 @@ struct event_task_t {
 #define SENSOR_BAROMETER 4
 
 void safeDeleteEventData(Event e, void* data);
+uint32_t eventDataSize(Event e, void* data);
 
 #endif

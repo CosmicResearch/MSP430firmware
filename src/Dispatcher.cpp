@@ -128,7 +128,7 @@ void Dispatcher::subscribe(Event event, Middleware* middleware) {
 }
 
 uint8_t Dispatcher::findFirstEventProcess(boolean_t& found) {
-    uint8_t process_id;
+    uint8_t process_id = 0;
     found = false;
     uint8_t process_index = 0;
     while (process_index < MAX_NUMBER_OF_TASKS_PER_DEVICE && !found) {
@@ -138,7 +138,7 @@ uint8_t Dispatcher::findFirstEventProcess(boolean_t& found) {
         }
         ++process_index;
     }
-    return process_index;
+    return process_id;
 }
 
 /**
