@@ -19,5 +19,6 @@
 #include "SensMag.h"
 
 typedef SensMAG Magnetometer;
+typedef lsm9ds0_data_t mag_data_t;
 
 #endif

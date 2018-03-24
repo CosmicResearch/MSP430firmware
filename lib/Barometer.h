@@ -26,4 +26,6 @@ struct bmp280_data_comp_t : sensor_data_t {
     int32_t altitude;
 };
 
+typedef bmp280_data_comp_t bar_data_t;
+
 #endif
