@@ -63,6 +63,7 @@ struct event_task_t {
 #define EVENT_READ_GYROSCOPE 4
 #define EVENT_READ_BAROMETER 5
 #define EVENT_READ_KALMAN 6
+#define EVENT_READ_ORIENTATION 7
 
 /**
  * NOTIFICATIONS 16-31
