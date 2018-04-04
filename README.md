@@ -1,12 +1,12 @@
 # Bondar Avionics Firmware
 
-Firmware for the Bondar's avionic system. For using this software you will need access to Senscape's OS (SensOS) and libraries. Senscape is an [Irideon](http://irideon.eu/) product.
+Firmware for the Bondar's avionic system. It has been built around a Senscape board using SensOS. Senscape is an [Irideon](http://irideon.eu/) product.
 
-SensOS (and all Senscape-related code) is distributed under Irideon's End-User Agreement, and is not free software.
+You can download SensOS and its system libraries from [here](https://github.com/CosmicResearch/BondarAvionics/releases/download/0.0.1/libs.zip).
 
 ## Build instructions
 
-* Import the project to Code Composer Studio
+* Import the project to Code Composer Studio IDE
 * Download and install the [GNU GCC MSP430 4.6.3 toolchain](http://gnutoolchains.com/msp430/)
 * Right click on the project -> Properties -> General
 * In the tool-chain section select 'More...' -> Add, and select the folder where you have installed the toolchain
