@@ -19,7 +19,7 @@
 #include "Bondar.h"
 #include "SensSDVolume.h"
 
-#define FIRST_BLOCK     (1)
+#define FIRST_BLOCK     (2)
 #define LAST_BLOCK      (999)
 #define BLOCK_SIZE      (512)
 

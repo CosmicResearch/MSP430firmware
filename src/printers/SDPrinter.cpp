@@ -31,11 +31,18 @@ SDPrinter::SDPrinter(SensSDVolume* volume, Resource* resource) {
 error_t SDPrinter::start() {
     volume->attachOnInitCardDone(onInitCardDone);
     volume->attachOnWriteBlockDone(onWriteBlockDone);
-    volume->initCard();
-    return SUCCESS;
+    error_t ret = volume->initCard();
+    if (ret==SUCCESS)
+        started = true;
+    return ret;
+}
+
+bool SDPrinter::isStarted() {
+    return started;
 }
 
 error_t SDPrinter::stop() {
+    started = false;
     return SUCCESS;
 }
 
@@ -44,21 +51,27 @@ void SDPrinter::print(Event e, void* data) {
         return;
     }
     uint32_t dataSize = eventDataSize(e, data);
-    if ((dataSize + 2 + buffPos) >= BLOCK_SIZE) {
+    Debug.print("Event: ").print(e).print("Data size: ").println((int)dataSize);
+    if ((dataSize + 5 + buffPos) >= BLOCK_SIZE) {
          writeBlock(bufferInUse);
     }
     char* dataBytes = (char*)data;
     bufferInUse[buffPos] = e;
-    bufferInUse[buffPos+1] = dataSize;
-    for(int i = 4; i < dataSize; ++i) {
+    bufferInUse[buffPos+1] = dataSize&0x00FF;
+    bufferInUse[buffPos+2] = (dataSize>>8)&0x00FF;
+    bufferInUse[buffPos+3] = (dataSize>>16)&0x00FF;
+    bufferInUse[buffPos+4] = (dataSize>>24)&0x00FF;
+    for(int i = 4; i < dataSize+4; ++i) {
         bufferInUse[i+buffPos] = dataBytes[i];
     }
-    buffPos += dataSize + 2;
+    buffPos += dataSize + 5;
 }
 
 void SDPrinter::writeBlock(uint8_t* buffer) {
+    Debug.println("writeBlock");
     buffPos = 0;
     if (writing) {
+        Debug.println("Its writing");
         return;
     }
     uint8_t* bufferToWrite = bufferInUse;
@@ -79,6 +92,7 @@ void SDPrinter::writeBlockTask(void* buffer) {
 
 void SDPrinter::onInitCardDone(error_t result) {
     if (result != SUCCESS) {
+        Debug.println("Could not init SD");
         return;
     }
     started = true;

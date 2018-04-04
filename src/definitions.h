@@ -24,8 +24,8 @@
 #define SENSOR_NOISE 1
 #define ESTIMATED_ERROR 1023
 #define INITIAL_VALUE 0
-#define PIN_MAIN 13
-#define PIN_PILOT 14
+#define PIN_MAIN 12
+#define PIN_PILOT 26
 #define ALTITUDE_MAIN 1000
 
 #endif

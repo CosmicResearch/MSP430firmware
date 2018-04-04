@@ -69,16 +69,47 @@ void DebugPrinter::print(Event event, void* data) {
             Debug.print("x: ").print(accel_data._chanx*0.1f*9.80665f).print("m/s^2 y: ").print(accel_data._chany*0.1*9.80665f).print("m/s^2 z: ").print(accel_data._chanz*0.1f*9.80665f).println("m/s^2");
             break;
         }
+        case EVENT_READ_GYROSCOPE: {
+            Debug.println("Received gyro data");
+            int16_t x, y, z;
+            lsm9ds0gyro_data_t data_t = *((lsm9ds0gyro_data_t*) data);
+            x = data_t.x;
+            y = data_t.y;
+            z = data_t.z;
+            Debug.print("X axis: ").println(x);
+            Debug.print("Y axis: ").println(y);
+            Debug.print("Z axis: ").println(z);
+            break;
+        }
+        case EVENT_READ_MAGNETOMETER: {
+            Debug.println("Received mag data");
+            int16_t xhi, yhi, zhi;
+            lsm9ds0_data_t data_t = *((lsm9ds0_data_t*) data);
+            xhi = data_t.x;
+            yhi = data_t.y;
+            zhi = data_t.z;
+            Debug.print("x: ").println(xhi);
+            Debug.print("y: ").println(yhi);
+            Debug.print("z: ").println(zhi);
+            Debug.print("Temperature: ").print(data_t.u_temp).println("Cº");
+            break;
+        }
+        case EVENT_READ_KALMAN: {
+            Debug.println("Received kalman data");
+            kalman_data_t data_t = *((kalman_data_t*) data);
+            Debug.print("Altitude: ").println(data_t.altitude);
+            break;
+        }
         case EVENT_SENSOR_INIT: {
-            Debug.print("Init of sensor").println(*((int*) data));
+            Debug.print("Init of sensor").println(*((unsigned int*) data));
             break;
         }
         case EVENT_ERROR_SENSOR_INIT: {
-            Debug.print("Error at init of sensor").println(*((int*) data));
+            Debug.print("Error at init of sensor").println(*((unsigned int*) data));
             break;
         }
         case EVENT_ERROR_SENSOR_READ: {
-            Debug.print("Error when reading sensor").println(*((int*) data));
+            Debug.print("Error when reading sensor").println(*((unsigned int*) data));
             break;
         }
 
