@@ -19,11 +19,11 @@
 #include "Bondar.h"
 #include "SensSDVolume.h"
 
-#define FIRST_BLOCK     (2)
-#define LAST_BLOCK      (999)
+#define FIRST_BLOCK     (1)
+#define LAST_BLOCK      (2000)
 #define BLOCK_SIZE      (512)
 
-class SDPrinter : public Printer {
+class SDRawPrinter : public Printer {
 
 private:
 
@@ -37,8 +37,9 @@ private:
 
     static bool writing;
     static bool started;
+    static bool waitingToStart;
 
-    static SDPrinter* instance;
+    static SDRawPrinter* instance;
 
     static void onInitCardDone(error_t result);
     static void onWriteBlockDone(error_t result);
@@ -47,7 +48,7 @@ private:
     void writeBlock(uint8_t* buffer);
 
 public:
-    SDPrinter(SensSDVolume* volume, Resource* resource);
+    SDRawPrinter(SensSDVolume* volume, Resource* resource);
 
     virtual error_t start();
 

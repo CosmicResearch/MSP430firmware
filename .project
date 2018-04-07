@@ -24,4 +24,17 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>SD_lib.a</name>
+			<type>1</type>
+			<locationURI>copy_PARENT/hardware/libraries/SD/SD_lib.a</locationURI>
+		</link>
+	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-1-TI_PRODUCTS_DIR%7D/Senscape</value>
+		</variable>
+	</variableList>
 </projectDescription>

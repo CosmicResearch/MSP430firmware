@@ -13,10 +13,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <printers/SDRawPrinter.h>
 #include "Bondar.h"
 #include "Poller.h"
 #include "printers/DebugPrinter.h"
-#include "printers/SDPrinter.h"
 #include "actuators/PilotActuator.h"
 #include "actuators/MainActuator.h"
 
@@ -67,7 +67,7 @@ const float_t SEA_LEVEL_PRESSURE = 101325.0f;
 Resource sd_resource = Resource(ARBITER_USCIB_1);
 SensSDVolume VOLUME(&Spi1, &sd_resource);
 
-SDPrinter* sdPrinter = new SDPrinter(&VOLUME, &sd_resource);
+SDRawPrinter* sdPrinter = new SDRawPrinter(&VOLUME, &sd_resource);
 
 GPS gps = GPS(&Serial0, 9600);
 Accelerometer accel = Accelerometer(&adcx, &adcy, &adcz);
@@ -81,23 +81,23 @@ void setup(void) {
 #endif
     dispatcher = Dispatcher::createInstance();
     /*TODO: subscribe actuators and printers to the dispatcher*/
-    dispatcher->subscribe(EVENT_READ_GPS, printer);
+    /*dispatcher->subscribe(EVENT_READ_GPS, printer);
     dispatcher->subscribe(EVENT_READ_ACCELEROMETER, printer);
     dispatcher->subscribe(EVENT_READ_GYROSCOPE, printer);
     dispatcher->subscribe(EVENT_READ_MAGNETOMETER, printer);
     dispatcher->subscribe(EVENT_READ_KALMAN, printer);
     dispatcher->subscribe(EVENT_READ_ORIENTATION, printer);
     dispatcher->subscribe(EVENT_SENSOR_INIT, printer);
-    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer);
+    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, printer);*/
 
-    /*dispatcher->subscribe(EVENT_READ_GPS, sdPrinter);
+    dispatcher->subscribe(EVENT_READ_GPS, sdPrinter);
     dispatcher->subscribe(EVENT_READ_ACCELEROMETER, sdPrinter);
     dispatcher->subscribe(EVENT_READ_GYROSCOPE, sdPrinter);
     dispatcher->subscribe(EVENT_READ_MAGNETOMETER, sdPrinter);
     dispatcher->subscribe(EVENT_READ_KALMAN, sdPrinter);
     dispatcher->subscribe(EVENT_READ_ORIENTATION, sdPrinter);
     dispatcher->subscribe(EVENT_SENSOR_INIT, sdPrinter);
-    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, sdPrinter);*/
+    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, sdPrinter);
 
 
     dispatcher->subscribe(EVENT_APOGEE, &pilotActuator);

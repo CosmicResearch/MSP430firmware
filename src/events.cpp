@@ -80,30 +80,25 @@ uint32_t eventDataSize(Event e, void* data) {
         switch (e) {
 
             case EVENT_READ_GPS: {
-                gps_data_t* gps_data = (gps_data_t*)data;
                 res = sizeof(gps_data_t);
                 break;
             }
             case EVENT_READ_ACCELEROMETER: {
-                adxl377_data_t* accel_data = (adxl377_data_t*) data;
                 res = sizeof(accel_data_t);
                 break;
             }
 
             case EVENT_READ_MAGNETOMETER: {
-                lsm9ds0_data_t* mag_data = (lsm9ds0_data_t*) data;
                 res = sizeof(lsm9ds0_data_t);
                 break;
             }
 
             case EVENT_READ_GYROSCOPE: {
-                lsm9ds0gyro_data_t* gyro_data = (lsm9ds0gyro_data_t*) data;
                 res = sizeof(lsm9ds0gyro_data_t);
                 break;
             }
 
             case EVENT_READ_BAROMETER: {
-                bmp280_data_comp_t* bar_data = (bmp280_data_comp_t*) data;
                 res = sizeof(bmp280_data_comp_t);
                 break;
             }
@@ -116,13 +111,11 @@ uint32_t eventDataSize(Event e, void* data) {
             case EVENT_SUPERSONIC_ENDED:
             case EVENT_ERROR_PILOT:
             case EVENT_ERROR_MAIN: {
-                kalman_data_t* kalman_data = (kalman_data_t*) data;
                 res = sizeof(kalman_data_t);
                 break;
             }
             case EVENT_ERROR_SENSOR_INIT:
             case EVENT_ERROR_SENSOR_READ: {
-                uint8_t* uid = (uint8_t*) data;
                 res = sizeof(uint8_t);
                 break;
             }

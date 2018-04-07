@@ -47,6 +47,7 @@ void SensorFusionMiddleware::execute(Event event, void* data) {
     if (accelRead && magRead) {
 
         sensfusion_data_t* data = new sensfusion_data_t;
+        data->time = localTimeMillis();
 
         sensorFusion.accelGetOrientation(&accelData, data);
         sensorFusion.magTiltCompensation(SENSOR_AXIS_X, &magData, &accelData);

@@ -16,12 +16,14 @@
 #ifndef BONDAR_KALMAN
 #define BONDAR_KALMAN
 
+#include "sensor_types.h"
+
 enum kalman_type_t {
     singleP = 0,
     doubleP
 };
 
-struct kalman_data_t : sensor_data_t {
+struct kalman_data_t : sensor_data_base_t {
     int32_t altitude;
     float_t velocity;
     kalman_type_t type;

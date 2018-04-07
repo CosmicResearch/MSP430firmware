@@ -64,6 +64,7 @@ void ApogeeMiddleware::execute(Event e, void* data) {
 
     bool apogee = false;
     kalman_data_t* kalman_data = new kalman_data_t;
+    kalman_data->time = localTimeMillis();
 
     if (e == EVENT_READ_GPS) {
 

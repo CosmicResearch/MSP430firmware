@@ -189,6 +189,8 @@ void Poller::onGPSRead(sensor_data_t* data, error_t error) {
         Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_GPS));
         return;
     }
+    gps_data_t* gps_data = (gps_data_t*) data;
+    gps_data->time = localTimeMillis();
     Poller::instance->dispatch(EVENT_READ_GPS, data);
 }
 
@@ -197,6 +199,8 @@ void Poller::onAccelerometerRead(sensor_data_t* data, error_t error) {
         Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_ACCELEROMETER));
         return;
     }
+    accel_data_t* accel_data = (accel_data_t*) data;
+    accel_data->time = localTimeMillis();
     Poller::instance->dispatch(EVENT_READ_ACCELEROMETER, data);
 }
 
@@ -209,6 +213,7 @@ void Poller::onBarometerRead(sensor_data_t* data, error_t error) {
     new_data->pressure = Poller::instance->bar->getPressure(data);
     new_data->temperature = Poller::instance->bar->getTemperature(data);
     new_data->altitude = Poller::instance->bar->getAltitude(new_data->pressure)*100;
+    new_data->time = localTimeMillis();
     Poller::instance->dispatch(EVENT_READ_BAROMETER, new_data);
 }
 
@@ -217,6 +222,8 @@ void Poller::onGyroscopeRead(sensor_data_t* data, error_t error) {
         Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_GYROSCOPE));
         return;
     }
+    gyro_data_t* gyro_data = (gyro_data_t*) data;
+    gyro_data->time = localTimeMillis();
     Poller::instance->dispatch(EVENT_READ_GYROSCOPE, data);
 }
 
@@ -225,6 +232,8 @@ void Poller::onMagnetometerRead(sensor_data_t* data, error_t error) {
         Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_MAGNETOMETER));
         return;
     }
+    mag_data_t* mag_data = (mag_data_t*) data;
+    mag_data->time = localTimeMillis();
     Poller::instance->dispatch(EVENT_READ_MAGNETOMETER, data);
 }
 

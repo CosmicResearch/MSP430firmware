@@ -17,10 +17,11 @@
 #define BONDAR_BAROMETER
 
 #include "SensBMP280.h"
+#include "sensor_types.h"
 
 typedef SensBMP280 Barometer;
 
-struct bmp280_data_comp_t : sensor_data_t {
+struct bmp280_data_comp_t : sensor_data_base_t {
     float_t pressure;
     float_t temperature;
     int32_t altitude;

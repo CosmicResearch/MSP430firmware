@@ -2,6 +2,7 @@
 #include "SensMag.h"
 #include "Senscape.h"
 #include "math.h"
+#include "sensor_types.h"
 
 //const float_t MPI = 3.141592;
 #define GyroMeasError PI * (40.0f / 180.0f)       // gyroscope measurement error in rads/s (shown as 3 deg/s)
@@ -15,7 +16,7 @@ typedef enum {
 	SENSOR_AXIS_Z = (3)
 } sensaxis_t;
 
-struct sensfusion_data_t{
+struct sensfusion_data_t : sensor_data_base_t {
 	float_t pitch, roll, heading;
 };
 

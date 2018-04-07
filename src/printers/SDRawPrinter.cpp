@@ -13,40 +13,49 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <printers/SDPrinter.h>
+#include <printers/SDRawPrinter.h>
 
-SDPrinter* SDPrinter::instance = NULL;
-uint32_t SDPrinter::blockNumber = FIRST_BLOCK;
-bool SDPrinter::writing = false;
-bool SDPrinter::started = false;
+SDRawPrinter* SDRawPrinter::instance = NULL;
+uint32_t SDRawPrinter::blockNumber = FIRST_BLOCK;
+bool SDRawPrinter::writing = false;
+bool SDRawPrinter::started = false;
+bool SDRawPrinter::waitingToStart = false;
 
-SDPrinter::SDPrinter(SensSDVolume* volume, Resource* resource) {
+SDRawPrinter::SDRawPrinter(SensSDVolume* volume, Resource* resource) {
     this->volume = volume;
     this->resource = resource;
-    SDPrinter::instance = this;
+    SDRawPrinter::instance = this;
     this->bufferInUse = waitBuff1;
     this->buffPos = 0;
 }
 
-error_t SDPrinter::start() {
+error_t SDRawPrinter::start() {
+    if (waitingToStart || started) {
+        return EALREADY;
+    }
     volume->attachOnInitCardDone(onInitCardDone);
     volume->attachOnWriteBlockDone(onWriteBlockDone);
     error_t ret = volume->initCard();
-    if (ret==SUCCESS)
-        started = true;
+    if (ret==SUCCESS) {
+        Debug.println("Initcard success");
+        waitingToStart = true;
+    }
+    else {
+        Debug.println("Initcard fail");
+    }
     return ret;
 }
 
-bool SDPrinter::isStarted() {
+bool SDRawPrinter::isStarted() {
     return started;
 }
 
-error_t SDPrinter::stop() {
+error_t SDRawPrinter::stop() {
     started = false;
     return SUCCESS;
 }
 
-void SDPrinter::print(Event e, void* data) {
+void SDRawPrinter::print(Event e, void* data) {
     if (!started) {
         return;
     }
@@ -61,14 +70,14 @@ void SDPrinter::print(Event e, void* data) {
     bufferInUse[buffPos+2] = (dataSize>>8)&0x00FF;
     bufferInUse[buffPos+3] = (dataSize>>16)&0x00FF;
     bufferInUse[buffPos+4] = (dataSize>>24)&0x00FF;
-    for(int i = 4; i < dataSize+4; ++i) {
+    for(int i = 5; i < dataSize+5; ++i) {
         bufferInUse[i+buffPos] = dataBytes[i];
     }
     buffPos += dataSize + 5;
 }
 
-void SDPrinter::writeBlock(uint8_t* buffer) {
-    Debug.println("writeBlock");
+void SDRawPrinter::writeBlock(uint8_t* buffer) {
+    Debug.print("writeBlock ").println(blockNumber);
     buffPos = 0;
     if (writing) {
         Debug.println("Its writing");
@@ -79,26 +88,33 @@ void SDPrinter::writeBlock(uint8_t* buffer) {
         bufferInUse = waitBuff2;
     }
     else {
-        bufferInUse = waitBuff2;
+        bufferInUse = waitBuff1;
     }
     writing = true;
     postTask(writeBlockTask, bufferToWrite);
 }
 
-void SDPrinter::writeBlockTask(void* buffer) {
+void SDRawPrinter::writeBlockTask(void* buffer) {
+    Debug.println("writeBlockTask");
     uint8_t* bufferBytes = (uint8_t*) buffer;
     instance->volume->writeBlock(blockNumber, bufferBytes);
 }
 
-void SDPrinter::onInitCardDone(error_t result) {
+void SDRawPrinter::onInitCardDone(error_t result) {
     if (result != SUCCESS) {
         Debug.println("Could not init SD");
         return;
     }
+    Debug.println("SD started!");
     started = true;
+    waitingToStart = false;
 }
 
-void SDPrinter::onWriteBlockDone(error_t result) {
+void SDRawPrinter::onWriteBlockDone(error_t result) {
+    Debug.print("writeBlockDone").println((result==SUCCESS)?"SUCCESS":"FAIL");
     writing = false;
     blockNumber++;
+    if (blockNumber > LAST_BLOCK) {
+        started = false;
+    }
 }
