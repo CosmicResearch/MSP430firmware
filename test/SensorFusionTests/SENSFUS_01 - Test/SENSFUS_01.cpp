@@ -7,13 +7,16 @@
 #include "Senscape.h"
 #include "SensorFusion.h"
 #include "SensADC.h"
-#include "Accelerometer.h"
-#include "Magnetometer.h"
+#include "SensADXL377.h"
+#include "SensMAG.h"
+#include "SensLSM9DS0Gyro.h"
 
 Resource mag_resource = Resource(ARBITER_USCIB_0);
+Resource adc_reource = Resource(ARBITER_ADC);
 
 SensADC _adcx =  SensADC(
-				ADC_CHANNEL_1,
+                &adc_reource,
+				ADC_CHANNEL_3,
 				REFERENCE_AVcc_AVss,
 				REFVOLT_LEVEL_NONE,
 				SHT_SOURCE_ACLK,
@@ -23,6 +26,7 @@ SensADC _adcx =  SensADC(
 				SAMPCON_CLOCK_DIV_1);
 
 SensADC _adcy =  SensADC(
+                &adc_reource,
 				ADC_CHANNEL_2,
 				REFERENCE_AVcc_AVss,
 				REFVOLT_LEVEL_NONE,
@@ -33,7 +37,8 @@ SensADC _adcy =  SensADC(
 				SAMPCON_CLOCK_DIV_1);
 
 SensADC _adcz =  SensADC(
-				ADC_CHANNEL_3,
+                &adc_reource,
+				ADC_CHANNEL_1,
 				REFERENCE_AVcc_AVss,
 				REFVOLT_LEVEL_NONE,
 				SHT_SOURCE_ACLK,
@@ -42,20 +47,21 @@ SensADC _adcz =  SensADC(
 				SAMPCON_SOURCE_SMCLK,
 				SAMPCON_CLOCK_DIV_1);
 
-Accelerometer ACC (_adcx, _adcy, _adcz);
-Magnetometer  MAG (&Spi0, &mag_resource, M_SCALE_2GS, M_ODR_125);
+SensADXL377 ACC (&_adcx, &_adcy, &_adcz);
+SensMAG  MAG (&Spi0, &mag_resource, M_SCALE_2GS, M_ODR_125);
 
 adxl377_data_t* data_acc;
-lsm9ds0_data_t* data_mag;
-sensfusion_data_t* data;
-SensorFusion SF();
+lsm9ds0_data_t data_mag;
+sensfusion_data_t data;
+SensFusion SF;
 
-boolean_t acc_read, mag_read;
-
+boolean_t acc_read, mag_read, gyro_read;
 void onReadDoneAcc(sensor_data_t* data, error_t result);
 void onStartDoneAcc(error_t result);
 void onReadDoneMag(sensor_data_t* data, error_t result);
 void onStartDoneMag(error_t result);
+void onReadDoneGyro(sensor_data_t* data, error_t result);
+void onStartDoneGyro(error_t result);
 
 void setup(void) {
 	Debug.begin();
@@ -63,8 +69,6 @@ void setup(void) {
 	// TOSO F("...")
 	Debug.println("SENSFUS_01 example - Test Sensor Fusion");
 	Debug.println();
-
-	data* = new sensfusion_data_t;
 
 	acc_read = mag_read = 0;
 
@@ -79,22 +83,25 @@ void setup(void) {
 
 void loop(void) {
 	if (acc_read and mag_read){
-		SF.accelGetOrientation(data_acc, data);
 
-		SF.magTiltCompensation(SENSOR_AXIS_X, data_mag, data_acc);
-		SF.magTiltCompensation(SENSOR_AXIS_Y, data_mag, data_acc);
-		SF.magTiltCompensation(SENSOR_AXIS_Z, data_mag, data_acc);
+	    Debug.print("METHOD 1:");
+		SF.accelGetOrientation(data_acc, &data);
+		SF.magTiltCompensation(SENSOR_AXIS_Z, &data_mag, data_acc);
 
-		SF.magGetOrientation(SENSOR_AXIS_X, data_mag, sensfusion_data_t* data)
+		SF.magGetOrientation(SENSOR_AXIS_Z, &data_mag, &data);
+		SF.fusionGetOrientation(data_acc, &data_mag, &data);
 		//SF.magGetOrientation(SENSOR_AXIS_Y, data_mag, sensfusion_data_t* data)
 		//SF.magGetOrientation(SENSOR_AXIS_Z, data_mag, sensfusion_data_t* data)
 
-		Debug.print("Pitch: ").println(data->pitch);
-		Debug.print("Roll: ").println(data->roll);
-		Debug.print("Heading: ").println(data->heading);
+		Debug.print("Pitch: ").println(data.pitch);
+		Debug.print("Roll: ").println(data.roll);
+		Debug.print("Heading: ").println(data.heading);
+
+		Debug.print("METHOD 2:");
+		//SF.MadgwickQuaternionUpdate(ax, ay, az, gx, gy, gz, mx, my, mz):
 
 		Debug.println("---------------------------------------------------------------------");
-		Debug.delay(1000);
+		delay(1000);
 
 		acc_read = 0;
 		mag_read = 0;
@@ -119,8 +126,11 @@ void onStartDoneMag(error_t result){
 void onReadDoneMag(sensor_data_t* data_t, error_t result) {
     if (result == SUCCESS) {
     		Debug.println();
-    		Debug.print("Magnetometer has been read... ");
-    		data = (lsm9ds0_data_t*) data_t;
+    		Debug.println("Magnetometer has been read... ");
+    		data_mag = *((lsm9ds0_data_t*) data_t);
+    		Debug.print("x: ").println(data_mag.x);
+            Debug.print("y: ").println(data_mag.y);
+            Debug.print("z: ").println(data_mag.z);
     		mag_read = 1;
 
 	}
@@ -146,10 +156,12 @@ void onStartDoneAcc(error_t result){
 void onReadDoneAcc(sensor_data_t* data_t, error_t result) {
     if (result == SUCCESS) {
     		Debug.println();
-    		Debug.print("Accelerometer has been read... ");
-    		data = (adxl377_data_t*) data_t;
+    		Debug.println("Accelerometer has been read... ");
+    		data_acc = ((adxl377_data_t*) data_t);
     		acc_read = 1;
-
+    		Debug.print("x: ").println(data_acc->_chanx);
+            Debug.print("y: ").println(data_acc->_chany);
+            Debug.print("z: ").println(data_acc->_chanz);
 	}
 	else {
 		Debug.println("error in Accelerometer, trying to read again ...");
