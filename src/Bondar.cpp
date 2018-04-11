@@ -13,7 +13,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <printers/SDFilePrinter.h>
+#include <printers/SDRawPrinter.h>
 #include "Bondar.h"
 #include "Poller.h"
 #include "printers/DebugPrinter.h"
