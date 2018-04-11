@@ -1,3 +1,7 @@
+
+#ifndef BONDAR_SENSORFUSION
+#define BONDAR_SENSORFUSION
+
 #include "SensADXL377.h"
 #include "SensMag.h"
 #include "Senscape.h"
@@ -38,3 +42,5 @@ class SensFusion{
 		error_t getMadgwickOrientation(sensfusion_data_t* data);
 
 };
+
+#endif

@@ -13,7 +13,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <printers/SDRawPrinter.h>
+#include <printers/SDFilePrinter.h>
 #include "Bondar.h"
 #include "Poller.h"
 #include "printers/DebugPrinter.h"
@@ -26,11 +26,18 @@ DebugPrinter* printer = new DebugPrinter(0);
 PilotActuator pilotActuator = PilotActuator();
 MainActuator mainActuator = MainActuator();
 
-Resource resx = Resource(ARBITER_ADC);
-Resource resy = Resource(ARBITER_ADC);
-Resource resz = Resource(ARBITER_ADC);
+Resource accelRes = Resource(ARBITER_ADC);
 
-SensADC adcx = SensADC(&resx,
+SensADC adcx = SensADC(&accelRes,
+        ADC_CHANNEL_4,
+        REFERENCE_AVcc_AVss,
+        REFVOLT_LEVEL_NONE,
+        SHT_SOURCE_ACLK,
+        SHT_CLOCK_DIV_1,
+        SAMPLE_HOLD_4_CYCLES,
+        SAMPCON_SOURCE_SMCLK,
+        SAMPCON_CLOCK_DIV_1);
+SensADC adcy = SensADC(&accelRes,
         ADC_CHANNEL_3,
         REFERENCE_AVcc_AVss,
         REFVOLT_LEVEL_NONE,
@@ -39,17 +46,8 @@ SensADC adcx = SensADC(&resx,
         SAMPLE_HOLD_4_CYCLES,
         SAMPCON_SOURCE_SMCLK,
         SAMPCON_CLOCK_DIV_1);
-SensADC adcy = SensADC(&resy,
+SensADC adcz = SensADC(&accelRes,
         ADC_CHANNEL_2,
-        REFERENCE_AVcc_AVss,
-        REFVOLT_LEVEL_NONE,
-        SHT_SOURCE_ACLK,
-        SHT_CLOCK_DIV_1,
-        SAMPLE_HOLD_4_CYCLES,
-        SAMPCON_SOURCE_SMCLK,
-        SAMPCON_CLOCK_DIV_1);
-SensADC adcz = SensADC(&resz,
-        ADC_CHANNEL_1,
         REFERENCE_AVcc_AVss,
         REFVOLT_LEVEL_NONE,
         SHT_SOURCE_ACLK,
@@ -67,7 +65,7 @@ const float_t SEA_LEVEL_PRESSURE = 101325.0f;
 Resource sd_resource = Resource(ARBITER_USCIB_1);
 SensSDVolume VOLUME(&Spi1, &sd_resource);
 
-SDRawPrinter* sdPrinter = new SDRawPrinter(&VOLUME, &sd_resource);
+SDRawPrinter* sdPrinter = new SDRawPrinter(&VOLUME);
 
 GPS gps = GPS(&Serial0, 9600);
 Accelerometer accel = Accelerometer(&adcx, &adcy, &adcz);
@@ -81,9 +79,9 @@ void setup(void) {
 #endif
     dispatcher = Dispatcher::createInstance();
     /*TODO: subscribe actuators and printers to the dispatcher*/
-    /*dispatcher->subscribe(EVENT_READ_GPS, printer);
-    dispatcher->subscribe(EVENT_READ_ACCELEROMETER, printer);
-    dispatcher->subscribe(EVENT_READ_GYROSCOPE, printer);
+    //dispatcher->subscribe(EVENT_READ_GPS, printer);
+    //dispatcher->subscribe(EVENT_READ_ACCELEROMETER, printer);
+    /*dispatcher->subscribe(EVENT_READ_GYROSCOPE, printer);
     dispatcher->subscribe(EVENT_READ_MAGNETOMETER, printer);
     dispatcher->subscribe(EVENT_READ_KALMAN, printer);
     dispatcher->subscribe(EVENT_READ_ORIENTATION, printer);

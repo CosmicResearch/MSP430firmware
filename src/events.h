@@ -25,6 +25,7 @@
 #include "Gyroscope.h"
 #include "Magnetometer.h"
 #include "Kalman.h"
+#include "sensorFusion/SensorFusion.h"
 
 typedef int8_t Event;
 
@@ -104,7 +105,31 @@ struct event_task_t {
 #define SENSOR_MAGNETOMETER 3
 #define SENSOR_BAROMETER 4
 
+/**
+ * Deletes the data associated to an Event
+ *
+ * @param event code
+ * @param event data
+ */
 void safeDeleteEventData(Event e, void* data);
-uint32_t eventDataSize(Event e, void* data);
+
+
+/**
+ * Returns the size of the data associated to an Event
+ * @param event code
+ * @return the size of the data
+ */
+uint32_t eventDataSize(Event e);
+
+
+/**
+ * Packs the event data to a buffer
+ * @param event code
+ * @param event data
+ * @param buffer where the data will be packed
+ * @param longitude of the packed data inside the buffer
+ * @return if the data could be packed or not. Return false if the packed data does not fit inside the buffer
+ */
+bool packEventData(Event e, void* data, char* buff, size_t& size);
 
 #endif

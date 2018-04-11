@@ -21,9 +21,8 @@ bool SDRawPrinter::writing = false;
 bool SDRawPrinter::started = false;
 bool SDRawPrinter::waitingToStart = false;
 
-SDRawPrinter::SDRawPrinter(SensSDVolume* volume, Resource* resource) {
+SDRawPrinter::SDRawPrinter(SensSDVolume* volume) {
     this->volume = volume;
-    this->resource = resource;
     SDRawPrinter::instance = this;
     this->bufferInUse = waitBuff1;
     this->buffPos = 0;
@@ -37,7 +36,9 @@ error_t SDRawPrinter::start() {
     volume->attachOnWriteBlockDone(onWriteBlockDone);
     error_t ret = volume->initCard();
     if (ret==SUCCESS) {
+#ifdef __DEBUG__
         Debug.println("Initcard success");
+#endif
         waitingToStart = true;
     }
     else {
@@ -59,25 +60,36 @@ void SDRawPrinter::print(Event e, void* data) {
     if (!started) {
         return;
     }
-    uint32_t dataSize = eventDataSize(e, data);
-    Debug.print("Event: ").print(e).print("Data size: ").println((int)dataSize);
-    if ((dataSize + 5 + buffPos) >= BLOCK_SIZE) {
+    char buff[100] = {0};
+    size_t dataSize;
+    packEventData(e, data, buff, dataSize);
+#ifdef __DEBUG__
+    Debug.print("Event: ").print(e).print(" size: ").print(dataSize).println("Packed data:");
+    for(size_t i = 0; i < dataSize; ++i) {
+        Debug.print((int)buff[i]).print(" ");
+    }
+    Debug.println();
+    for(size_t i = 0; i < dataSize; ++i) {
+        Debug.print(buff[i]).print(" ");
+    }
+    Debug.println();
+#endif
+    for(size_t i = 0; i < dataSize; ++i) {
+        bufferInUse[i+buffPos] = buff[i];
+    }
+    if ((dataSize + buffPos) >= BLOCK_SIZE) {
          writeBlock(bufferInUse);
     }
-    char* dataBytes = (char*)data;
-    bufferInUse[buffPos] = e;
-    bufferInUse[buffPos+1] = dataSize&0x00FF;
-    bufferInUse[buffPos+2] = (dataSize>>8)&0x00FF;
-    bufferInUse[buffPos+3] = (dataSize>>16)&0x00FF;
-    bufferInUse[buffPos+4] = (dataSize>>24)&0x00FF;
-    for(int i = 5; i < dataSize+5; ++i) {
-        bufferInUse[i+buffPos] = dataBytes[i];
+    for(size_t i = 0; i < dataSize; ++i) {
+        bufferInUse[i+buffPos] = buff[i];
     }
     buffPos += dataSize + 5;
 }
 
 void SDRawPrinter::writeBlock(uint8_t* buffer) {
+#ifdef __DEBUG__
     Debug.print("writeBlock ").println(blockNumber);
+#endif
     buffPos = 0;
     if (writing) {
         Debug.println("Its writing");
@@ -95,23 +107,31 @@ void SDRawPrinter::writeBlock(uint8_t* buffer) {
 }
 
 void SDRawPrinter::writeBlockTask(void* buffer) {
+#ifdef __DEBUG__
     Debug.println("writeBlockTask");
+#endif
     uint8_t* bufferBytes = (uint8_t*) buffer;
     instance->volume->writeBlock(blockNumber, bufferBytes);
 }
 
 void SDRawPrinter::onInitCardDone(error_t result) {
     if (result != SUCCESS) {
+#ifdef __DEBUG__
         Debug.println("Could not init SD");
+#endif
         return;
     }
+#ifdef __DEBUG__
     Debug.println("SD started!");
+#endif
     started = true;
     waitingToStart = false;
 }
 
 void SDRawPrinter::onWriteBlockDone(error_t result) {
+#ifdef __DEBUG__
     Debug.print("writeBlockDone").println((result==SUCCESS)?"SUCCESS":"FAIL");
+#endif
     writing = false;
     blockNumber++;
     if (blockNumber > LAST_BLOCK) {

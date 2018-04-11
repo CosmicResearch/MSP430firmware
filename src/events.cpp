@@ -72,10 +72,7 @@ void safeDeleteEventData(Event e, void* data) {
     }
 }
 
-uint32_t eventDataSize(Event e, void* data) {
-    if (data == NULL) {
-            return 0;
-        }
+uint32_t eventDataSize(Event e) {
         uint32_t res = 0;
         switch (e) {
 
@@ -122,4 +119,143 @@ uint32_t eventDataSize(Event e, void* data) {
 
         }
         return res;
+}
+
+bool packEventData(Event e, void* data, char* buff, size_t& size) {
+    if (sizeof(buff) < eventDataSize(e) + 1) {
+        return false;
+    }
+    buff[0] = (int8_t)e;
+    int i = 1;
+    switch(e) {
+
+    case EVENT_READ_GPS: {
+        gps_data_t gps_data = *((gps_data_t*)data);
+        uint8_t data_size = sizeof(gps_data.time) + sizeof(gps_data.altitude) + sizeof(gps_data.latitude) + sizeof(gps_data.longitude) + sizeof(gps_data.latitudeChar) + sizeof(gps_data.longitudeChar);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        memcpy(&buff[i], &gps_data.time, sizeof(gps_data.time));
+        i += sizeof(gps_data.time);
+        memcpy(&buff[i], &gps_data.altitude, sizeof(gps_data.altitude));
+        i += sizeof(gps_data.altitude);
+        memcpy(&buff[i], &gps_data.latitude, sizeof(gps_data.latitude));
+        i += sizeof(gps_data.latitude);
+        memcpy(&buff[i], &gps_data.longitude, sizeof(gps_data.longitude));
+        i += sizeof(gps_data.longitude);
+        memcpy(&buff[i], &gps_data.latitudeChar, sizeof(gps_data.latitudeChar));
+        i += sizeof(gps_data.latitudeChar);
+        memcpy(&buff[i], &gps_data.longitudeChar, sizeof(gps_data.longitudeChar));
+        i += sizeof(gps_data.longitudeChar);
+        break;
+    }
+
+    case EVENT_READ_ACCELEROMETER: {
+        accel_data_t accel_data = *((accel_data_t*)data);
+        uint8_t data_size = sizeof(accel_data.time) + sizeof(accel_data._chanx) + sizeof(accel_data._chany) + sizeof(accel_data._chanz);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        memcpy(&buff[i], &accel_data.time, sizeof(accel_data.time));
+        i += sizeof(accel_data.time);
+        memcpy(&buff[i], &accel_data._chanx, sizeof(accel_data._chanx));
+        i += sizeof(accel_data._chanx);
+        memcpy(&buff[i], &accel_data._chany, sizeof(accel_data._chany));
+        i += sizeof(accel_data._chany);
+        memcpy(&buff[i], &accel_data._chanz, sizeof(accel_data._chanz));
+        i += sizeof(accel_data._chanz);
+        break;
+    }
+
+    case EVENT_READ_MAGNETOMETER: {
+        mag_data_t mag_data = *((mag_data_t*)data);
+        uint8_t data_size = sizeof(mag_data.time) + sizeof(mag_data.x) + sizeof(mag_data.y) + sizeof(mag_data.z);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        memcpy(&buff[i], &mag_data.time, sizeof(mag_data.time));
+        i += sizeof(mag_data.time);
+        memcpy(&buff[i], &mag_data.x, sizeof(mag_data.x));
+        i += sizeof(mag_data.x);
+        memcpy(&buff[i], &mag_data.y, sizeof(mag_data.y));
+        i += sizeof(mag_data.y);
+        memcpy(&buff[i], &mag_data.z, sizeof(mag_data.z));
+        i += sizeof(mag_data.z);
+        break;
+    }
+
+    case EVENT_READ_GYROSCOPE: {
+        gyro_data_t mag_data = *((gyro_data_t*)data);
+        uint8_t data_size = sizeof(mag_data.time) + sizeof(mag_data.x) + sizeof(mag_data.y) + sizeof(mag_data.z);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        memcpy(&buff[i], &mag_data.time, sizeof(mag_data.time));
+        i += sizeof(mag_data.time);
+        memcpy(&buff[i], &mag_data.x, sizeof(mag_data.x));
+        i += sizeof(mag_data.x);
+        memcpy(&buff[i], &mag_data.y, sizeof(mag_data.y));
+        i += sizeof(mag_data.y);
+        memcpy(&buff[i], &mag_data.z, sizeof(mag_data.z));
+        i += sizeof(mag_data.z);
+        break;
+    }
+
+    case EVENT_READ_BAROMETER: {
+        bar_data_t mag_data = *((bar_data_t*)data);
+        uint8_t data_size = sizeof(mag_data.time) + sizeof(mag_data.pressure) + sizeof(mag_data.temperature) + sizeof(mag_data.altitude);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        memcpy(&buff[i], &mag_data.time, sizeof(mag_data.time));
+        i += sizeof(mag_data.time);
+        memcpy(&buff[i], &mag_data.pressure, sizeof(mag_data.pressure));
+        i += sizeof(mag_data.pressure);
+        memcpy(&buff[i], &mag_data.temperature, sizeof(mag_data.temperature));
+        i += sizeof(mag_data.temperature);
+        memcpy(&buff[i], &mag_data.altitude, sizeof(mag_data.altitude));
+        i += sizeof(mag_data.altitude);
+        break;
+    }
+
+    case EVENT_READ_KALMAN:
+    case EVENT_APOGEE:
+    case EVENT_MAIN_FIRED:
+    case EVENT_PILOT_FIRED:
+    case EVENT_LIFTOFF:
+    case EVENT_SUPERSONIC_STARTED:
+    case EVENT_SUPERSONIC_ENDED:
+    case EVENT_ERROR_PILOT:
+    case EVENT_ERROR_MAIN: {
+        kalman_data_t mag_data = *((kalman_data_t*)data);
+        uint8_t data_size = sizeof(mag_data.time) + sizeof(mag_data.altitude) + sizeof(mag_data.velocity) + sizeof(mag_data.type);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        memcpy(&buff[i], &mag_data.time, sizeof(mag_data.time));
+        i += sizeof(mag_data.time);
+        memcpy(&buff[i], &mag_data.altitude, sizeof(mag_data.altitude));
+        i += sizeof(mag_data.altitude);
+        memcpy(&buff[i], &mag_data.velocity, sizeof(mag_data.velocity));
+        i += sizeof(mag_data.velocity);
+        memcpy(&buff[i], &mag_data.type, sizeof(mag_data.type));
+        i += sizeof(mag_data.type);
+        break;
+    }
+
+    case EVENT_READ_ORIENTATION: {
+        sensfusion_data_t mag_data = *((sensfusion_data_t*)data);
+        uint8_t data_size = sizeof(mag_data.time) + sizeof(mag_data.pitch) + sizeof(mag_data.roll) + sizeof(mag_data.heading);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        memcpy(&buff[i], &mag_data.time, sizeof(mag_data.time));
+        i += sizeof(mag_data.time);
+        memcpy(&buff[i], &mag_data.pitch, sizeof(mag_data.pitch));
+        i += sizeof(mag_data.pitch);
+        memcpy(&buff[i], &mag_data.roll, sizeof(mag_data.roll));
+        i += sizeof(mag_data.roll);
+        memcpy(&buff[i], &mag_data.heading, sizeof(mag_data.heading));
+        i += sizeof(mag_data.heading);
+        break;
+        break;
+    }
+
+
+    }
+    size = i;
+    return true;
 }

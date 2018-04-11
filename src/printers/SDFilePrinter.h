@@ -13,41 +13,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BONDAR_SDPRINTER
-#define BONDAR_SDPRINTER
+#ifndef BONDAR_SDFILE
+#define BONDAR_SDFILE
 
 #include "Bondar.h"
 #include "SensSDVolume.h"
+#include "SensSDFile.h"
 
-#define FIRST_BLOCK     (50)
-#define LAST_BLOCK      (20000)
-#define BLOCK_SIZE      (512)
-
-class SDRawPrinter : public Printer {
-
-private:
-
-    static uint32_t blockNumber;
-    uint8_t waitBuff1[512];
-    uint8_t waitBuff2[512];
-    uint8_t * bufferInUse;
-    uint32_t buffPos;
-    SensSDVolume* volume;
-
-    static bool writing;
-    static bool started;
-    static bool waitingToStart;
-
-    static SDRawPrinter* instance;
-
-    static void onInitCardDone(error_t result);
-    static void onWriteBlockDone(error_t result);
-    static void writeBlockTask(void* buffer);
-
-    void writeBlock(uint8_t* buffer);
-
+class SDFilePrinter : public Printer {
 public:
-    SDRawPrinter(SensSDVolume* volume);
+    SDFilePrinter(SensSDVolume* volume, const char* filename);
 
     virtual error_t start();
 
@@ -56,7 +31,21 @@ public:
     virtual bool isStarted();
 
     virtual void print(Event e, void* data);
+private:
+    SensSDVolume* volume;
+    SensSDFile* file;
+    char filename[50];
 
+    bool started;
+    bool starting;
+    bool writing;
+
+    static void onInitDone(error_t result);
+    static void onOpenRootDone(error_t result);
+    static void onOpenFileDone(error_t result);
+    static void onWriteFileDone(uint16_t lenght, error_t result);
+
+    static SDFilePrinter* instance;
 };
 
 #endif
