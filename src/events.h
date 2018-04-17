@@ -126,10 +126,10 @@ uint32_t eventDataSize(Event e);
  * Packs the event data to a buffer
  * @param event code
  * @param event data
- * @param buffer where the data will be packed
- * @param longitude of the packed data inside the buffer
- * @return if the data could be packed or not. Return false if the packed data does not fit inside the buffer
+ * @param buffer where the data will be packed. IT MUST BE LARGE ENOUGH TO FIT ALL THE DATA!!
+ * @param here it will return the longitude of the packed data inside the buffer
+ * @return if the data could be packed or not
  */
-bool packEventData(Event e, void* data, char* buff, size_t& size);
+bool packEventData(Event e, void* data, char buff[], size_t& size);
 
 #endif

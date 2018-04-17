@@ -33,6 +33,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_4.0.compilerID.MMCU.22954470" name="Target MCU (-mmcu)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_4.0.compilerID.MMCU" value="msp430f2617" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_4.0.compilerID.INCLUDE_PATH.611017411" name="Include paths (-I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_4.0.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="C:/Senscape/hardware/msp430/cores/msp430f2617"/>
+									<listOptionValue builtIn="false" value="C:\Senscape\hardware\libraries\SX1272"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/lib/Bondarlibs}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/src/sensorFusion}"/>
 									<listOptionValue builtIn="false" value="C:\Senscape\hardware\libraries\SD"/>

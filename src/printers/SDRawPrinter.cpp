@@ -62,7 +62,9 @@ void SDRawPrinter::print(Event e, void* data) {
     }
     char buff[100] = {0};
     size_t dataSize;
-    packEventData(e, data, buff, dataSize);
+    if (!packEventData(e, data, buff, dataSize)) {
+        return; //Data cannot be packed
+    }
 #ifdef __DEBUG__
     Debug.print("Event: ").print(e).print(" size: ").print(dataSize).println("Packed data:");
     for(size_t i = 0; i < dataSize; ++i) {
@@ -83,7 +85,7 @@ void SDRawPrinter::print(Event e, void* data) {
     for(size_t i = 0; i < dataSize; ++i) {
         bufferInUse[i+buffPos] = buff[i];
     }
-    buffPos += dataSize + 5;
+    buffPos += dataSize;
 }
 
 void SDRawPrinter::writeBlock(uint8_t* buffer) {

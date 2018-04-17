@@ -121,10 +121,11 @@ uint32_t eventDataSize(Event e) {
         return res;
 }
 
-bool packEventData(Event e, void* data, char* buff, size_t& size) {
-    if (sizeof(buff) < eventDataSize(e) + 1) {
-        return false;
-    }
+bool packEventData(Event e, void* data, char buff[], size_t& size) {
+    bool ret = true;
+#ifdef __DEBUG__
+    Debug.print("Packing data for event ").println((int)e);
+#endif
     buff[0] = (int8_t)e;
     int i = 1;
     switch(e) {
@@ -146,6 +147,8 @@ bool packEventData(Event e, void* data, char* buff, size_t& size) {
         i += sizeof(gps_data.latitudeChar);
         memcpy(&buff[i], &gps_data.longitudeChar, sizeof(gps_data.longitudeChar));
         i += sizeof(gps_data.longitudeChar);
+        memcpy(&buff[i], &gps_data.fix, sizeof(gps_data.fix));
+        i += sizeof(gps_data.fix);
         break;
     }
 
@@ -251,11 +254,34 @@ bool packEventData(Event e, void* data, char* buff, size_t& size) {
         memcpy(&buff[i], &mag_data.heading, sizeof(mag_data.heading));
         i += sizeof(mag_data.heading);
         break;
+    }
+
+    case EVENT_ERROR_SENSOR_INIT:
+    case EVENT_SENSOR_INIT:
+    case EVENT_ERROR_SENSOR_READ: {
+        uint8_t id = *((uint8_t*)data);
+        uint8_t data_size = sizeof(id);
+        buff[i] = data_size;
+        i += sizeof(data_size);
+        buff[i] = id;
+        i += sizeof(id);
         break;
+    }
+
+    default: {
+        ret = false;
+        break;s
     }
 
 
     }
     size = i;
-    return true;
+#ifdef __DEBUG__
+    Debug.println("inside Pack data");
+    for (int j = 0; j < size; ++j) {
+        Debug.print((int)buff[j]).print(" ");
+    }
+    Debug.println();
+#endif
+    return ret;
 }

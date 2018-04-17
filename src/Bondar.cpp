@@ -94,8 +94,12 @@ void setup(void) {
     dispatcher->subscribe(EVENT_READ_MAGNETOMETER, sdPrinter);
     dispatcher->subscribe(EVENT_READ_KALMAN, sdPrinter);
     dispatcher->subscribe(EVENT_READ_ORIENTATION, sdPrinter);
-    dispatcher->subscribe(EVENT_SENSOR_INIT, sdPrinter);
-    dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, sdPrinter);
+    dispatcher->subscribe(EVENT_APOGEE, sdPrinter);
+    dispatcher->subscribe(EVENT_MAIN_FIRED, sdPrinter);
+    dispatcher->subscribe(EVENT_PILOT_FIRED, sdPrinter);
+    dispatcher->subscribe(EVENT_LIFTOFF, sdPrinter);
+    //dispatcher->subscribe(EVENT_SENSOR_INIT, sdPrinter);
+    //dispatcher->subscribe(EVENT_ERROR_SENSOR_READ, sdPrinter);
 
 
     dispatcher->subscribe(EVENT_APOGEE, &pilotActuator);
