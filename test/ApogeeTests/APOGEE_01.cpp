@@ -8,6 +8,7 @@
 #include "apogeeDetection.h"
 #include "singleKalman.h"
 #include "altitude_kf.h"
+#include "GPS.h"
 
 Resource mag_resource = Resource(ARBITER_USCIB_0);
 
@@ -20,40 +21,68 @@ SensApogee AP(&K, &myF);
 boolean_t detected;
 boolean_t once;
 
+const uint32_t baudrate = 9600;
+GPS gps(&Serial0, baudrate);
+
 void singleExecution();
+
+void startDone(error_t error) {
+    if (error == SUCCESS) {
+        Debug.println("start done");
+        //gps.read();
+    }
+    else {
+        Debug.println("error on start");
+    }
+}
+
+void stopDone(error_t error) {
+
+}
+
+void readDone(sensor_data_t* data, error_t error) {
+    if (error != SUCCESS) {
+        return;
+    }
+    gps_data_t gps_data = *((gps_data_t*)data);
+    if (strcmp(gps_data.type,"GGA") == 0){
+            Debug.println("---------------------------------------");
+            Debug.println("new gps data");
+            //Debug.print("Latitude: ").print(gps_data.latitude/1000000.0f).println(gps_data.latitudeChar);
+            //Debug.print("Longitude: ").print(gps_data.longitude/1000000.0f).println(gps_data.longitudeChar);
+            Debug.print("Altitude gps: ").print(gps_data.altitude/100).println(" m");
+            //Debug.print("Fix: ").println(gps_data.fix);
+            //Debug.print("Time: ").print(gps_data.hour).print(":").print(gps_data.minute).print(":").println(gps_data.seconds);
+            //Debug.print("Type: ").println(gps_data.type);
+            if (gps_data.altitude/100 != 0 and AP.apogeeDetectionSingleKF(gps_data.altitude)) {
+                Debug.print("Apogee Detected at: ").print(AP.getCorrectedAltitudeSingleKF()/100).println(" m");
+            }
+            else {
+                Debug.print("Altitude SKF: ").print(AP.getCorrectedAltitudeSingleKF()/100).println(" m");
+            }
+
+            delay(100);
+            delete (gps_data_t*)data;
+    }
+
+    //gps.read();
+}
 
 void setup(void) {
 	Debug.begin();
-
-	// TOSO F("...")
 	Debug.println("APOGEE_01 example - Test basic detection with Single Kalman");
 	Debug.println();
+	gps.attachStartDone(startDone);
+    gps.attachReadDone(readDone);
+    gps.attachStopDone(stopDone);
+
+	gps.start();
 	once = false;
 
 }
 
 void loop(void) {
-	if (!once) {
-		singleExecution();
-		once = 1;
-	}
-}
-
-void singleExecution(){
-	if (AP.apogeeDetectionSingleKF((int32_t) 100*100)) Debug.print("Apogee detected at a ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 200*100)) Debug.print("Apogee detected at b ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 300*100)) Debug.print("Apogee detected at c ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 400*100)) Debug.print("Apogee detected at d ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 500*100)) Debug.print("Apogee detected at e ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 550*100)) Debug.print("Apogee detected at f ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 600*100)) Debug.print("Apogee detected at g ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 550*100)) Debug.print("Apogee detected at h ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 500*100)) Debug.print("Apogee detected at j ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 400*100)) Debug.print("Apogee detected at k ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 300*100)) Debug.print("Apogee detected at l ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 200*100)) Debug.print("Apogee detected at m ").println(AP.getCorrectedAltitudeSingleKF()/100);
-	if (AP.apogeeDetectionSingleKF((int32_t) 100*100)) Debug.print("Apogee detected at n ").println(AP.getCorrectedAltitudeSingleKF()/100);
-
-	if ( not AP.apogeeDetection()) Debug.println("No apogee detected");
 
 }
+
+

@@ -2,11 +2,19 @@
 #include "math.h"
 
 
-float SensFusion::q[4] = {1.0f, 0.0f, 0.0f, 0.0f};    // vector to hold quaternion
-float SensFusion::deltat = 0.0;
-boolean_t SensFusion::madgDone = 0;
+float SensFusion::q[4];    // vector to hold quaternion
+float SensFusion::deltat;
+uint32_t SensFusion::lastUpdate;    // used to calculate integration interval
+uint32_t SensFusion::Now;           // used to calculate integration interval
+boolean_t SensFusion::madgDone;
 
-SensFusion::SensFusion(){};
+SensFusion::SensFusion(){
+    q[0] = 1.0f; q[1] = 0.0f; q[2] = 0.0f; q[3] = 0.0f;
+    deltat = 0.0f;
+    lastUpdate = 0;
+    Now = 0;
+    madgDone = 0;
+};
 
 
 
@@ -279,16 +287,39 @@ void SensFusion::MadgwickQuaternionUpdate(float ax, float ay, float az, float gx
     s4 = _2q2 * (2.0f * q2q4 - _2q1q3 - ax) + _2q3 * (2.0f * q1q2 + _2q3q4 - ay) + (-_4bx * q4 + _2bz * q2) * (_2bx * (0.5f - q3q3 - q4q4) + _2bz * (q2q4 - q1q3) - mx) + (-_2bx * q1 + _2bz * q3) * (_2bx * (q2q3 - q1q4) + _2bz * (q1q2 + q3q4) - my) + _2bx * q2 * (_2bx * (q1q3 + q2q4) + _2bz * (0.5f - q2q2 - q3q3) - mz);
     norm = sqrt(s1 * s1 + s2 * s2 + s3 * s3 + s4 * s4);    // normalise step magnitude
     norm = 1.0f/norm;
+
+    //Debug.print("norm:").println(norm);
+
     s1 *= norm;
     s2 *= norm;
     s3 *= norm;
     s4 *= norm;
+
+    //Debug.print("s1").println(s1);
+    //Debug.print("s2").println(s2);
+    //Debug.print("s3").println(s3);
+    //Debug.print("s4").println(s4);
 
     // Compute rate of change of quaternion
     qDot1 = 0.5f * (-q2 * gx - q3 * gy - q4 * gz) - beta * s1;
     qDot2 = 0.5f * (q1 * gx + q3 * gz - q4 * gy) - beta * s2;
     qDot3 = 0.5f * (q1 * gy - q2 * gz + q4 * gx) - beta * s3;
     qDot4 = 0.5f * (q1 * gz + q2 * gy - q3 * gx) - beta * s4;
+
+
+    //Debug.print("qDot1").println(qDot1);
+    //Debug.print("qDot2").println(qDot2);
+    //Debug.print("qDot3").println(qDot3);
+    //Debug.print("qDot4").println(qDot4);
+
+
+    Now = localTimeMillis()*1000;
+    deltat = ((Now - lastUpdate)/1000000.0f); // set integration time by time elapsed since last filter update
+    lastUpdate = Now;
+    ///Debug.print("Milis: ").println( localTimeMillis());
+    //Debug.print("Micros: ").println( localTimeMicros());
+
+    //Debug.print("deltat: ").println(deltat);
 
     // Integrate to yield quaternion
     q1 += qDot1 * deltat;
@@ -297,22 +328,39 @@ void SensFusion::MadgwickQuaternionUpdate(float ax, float ay, float az, float gx
     q4 += qDot4 * deltat;
     norm = sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4);    // normalise quaternion
     norm = 1.0f/norm;
+    //Debug.print("q1 ").println(q1);
+    //Debug.print("q2 ").println(q2);
+    //Debug.print("q3 ").println(q3);
+    //Debug.print("q4 ").println(q4);
+    //Debug.print("norm: ").println(norm);
     q[0] = q1 * norm;
     q[1] = q2 * norm;
     q[2] = q3 * norm;
     q[3] = q4 * norm;
+    //Debug.print("q[0] ").println(q[0]);
+    //Debug.print("q[1] ").println(q[1]);
+    //Debug.print("q[2] ").println(q[2]);
+    //Debug.print("q[3] ").println(q[3]);
 
     madgDone = 1;
 }
 
 error_t SensFusion::getMadgwickOrientation(sensfusion_data_t* data){
     if (madgDone) {
-        data->heading   = atan2(2.0f * (q[1] * q[2] + q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3]);
+        //Debug.print("qDot1 ").println(q[0]);
+        //Debug.print("qDot2 ").println(q[1]);
+        //Debug.print("qDot3 ").println(q[2]);
+        //Debug.print("qDot4 ").println(q[3]);
+        float aux1 = 2.0f * (q[1] * q[2] + q[0] * q[3]);
+        float aux2 = q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3];
+        //Debug.print("aux1: ").print(aux1).print("aux2: ").print(aux2);
+        data->heading   = atan2(aux1, aux2);
         data->pitch = -asin(2.0f * (q[1] * q[3] - q[0] * q[2]));
         data->roll  = atan2(2.0f * (q[0] * q[1] + q[2] * q[3]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3]);
         data->pitch *= 180.0f / PI;
         data->heading   *= 180.0f / PI;
-        data->heading   -= 13.8; // Declination at Danville, California is 13 degrees 48 minutes and 47 seconds on 2014-04-04
+        //data->heading   -= 13.8; // Declination at Danville, California is 13 degrees 48 minutes and 47 seconds on 2014-04-04
+        //2.01667
         data->roll  *= 180.0f / PI;
         return SUCCESS;
     }
