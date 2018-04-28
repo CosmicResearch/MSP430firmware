@@ -19,7 +19,7 @@ typedef enum {
 	SENSOR_AXIS_Z = (3)
 } sensaxis_t;
 
-struct sensfusion_data_t{
+struct sensfusion_data_t : sensor_data_base_t {
 	float_t pitch, roll, heading;
 };
 
