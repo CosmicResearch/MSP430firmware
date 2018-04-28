@@ -57,8 +57,7 @@ void PilotActuator::actuate(Event event, void* data) {
         wait(100);
         digitalWrite(PIN_PILOT, LOW);
 
-        Dispatcher* dispatcher = Dispatcher::createInstance();
-        dispatcher->dispatch(EVENT_PILOT_FIRED, data);
+        Dispatcher::instance().dispatch(EVENT_PILOT_FIRED, data);
     }
 }
 

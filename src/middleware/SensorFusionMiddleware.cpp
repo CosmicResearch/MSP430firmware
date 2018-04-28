@@ -56,7 +56,7 @@ void SensorFusionMiddleware::execute(Event event, void* data) {
 
         sensorFusion.magGetOrientation(SENSOR_AXIS_X, &magData, data);
 
-        Dispatcher::createInstance()->dispatch(EVENT_READ_ORIENTATION, data);
+        Dispatcher::instance().dispatch(EVENT_READ_ORIENTATION, data);
 
         accelRead = false;
         magRead = false;

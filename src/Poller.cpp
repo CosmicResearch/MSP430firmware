@@ -15,18 +15,15 @@
 
 #include "Poller.h"
 
-Poller* Poller::instance = NULL;
 
-Poller* Poller::createInstance(Dispatcher* dispatcher, uint32_t intervalMs) {
-    if (Poller::instance == NULL) {
-        Poller::instance = new Poller(intervalMs, dispatcher, new SensTimer(TMILLIS));
-    }
-    return Poller::instance;
+Poller& Poller::instance() {
+    static Poller p((uint32_t)POLL_INTERVAL, new SensTimer(TMILLIS));
+
+    return p;
 }
 
-Poller::Poller(uint32_t intervalMs, Dispatcher* dispatcher, SensTimer* timer) {
+Poller::Poller(uint32_t intervalMs, SensTimer* timer) {
     this->interval = intervalMs;
-    this->dispatcher = dispatcher;
     this->timer = timer;
     this->started = false;
     this->accel = NULL;
@@ -41,8 +38,8 @@ error_t Poller::start() {
     if (this->started) {
         return EALREADY; //Already running!
     }
-    if (!this->dispatcher->isStarted()) {
-        error_t ret = this->dispatcher->start();
+    if (!Dispatcher::instance().isStarted()) {
+        error_t ret = Dispatcher::instance().start();
         if (ret != SUCCESS) {
             return ERROR;
         }
@@ -113,7 +110,7 @@ bool Poller::isStarted() {
 }
 
 void Poller::tick() {
-    Poller::instance->readSensors();
+    Poller::instance().readSensors();
 }
 
 void Poller::readSensors() {
@@ -186,104 +183,104 @@ void Poller::attachMagnetometer(Magnetometer* magne) {
 
 void Poller::onGPSRead(sensor_data_t* data, error_t error) {
     if (error != SUCCESS) {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_GPS));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_GPS));
         return;
     }
     gps_data_t* gps_data = (gps_data_t*) data;
     gps_data->time = localTimeMillis();
-    Poller::instance->dispatch(EVENT_READ_GPS, data);
+    Poller::instance().dispatch(EVENT_READ_GPS, data);
 }
 
 void Poller::onAccelerometerRead(sensor_data_t* data, error_t error) {
     if (error != SUCCESS) {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_ACCELEROMETER));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_ACCELEROMETER));
         return;
     }
     accel_data_t* accel_data = (accel_data_t*) data;
     accel_data->time = localTimeMillis();
-    Poller::instance->dispatch(EVENT_READ_ACCELEROMETER, data);
+    Poller::instance().dispatch(EVENT_READ_ACCELEROMETER, data);
 }
 
 void Poller::onBarometerRead(sensor_data_t* data, error_t error) {
     if (error != SUCCESS) {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_BAROMETER));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_BAROMETER));
         return;
     }
     bmp280_data_comp_t* new_data = new bmp280_data_comp_t;
-    new_data->pressure = Poller::instance->bar->getPressure(data);
-    new_data->temperature = Poller::instance->bar->getTemperature(data);
-    new_data->altitude = Poller::instance->bar->getAltitude(new_data->pressure)*100;
+    new_data->pressure = Poller::instance().bar->getPressure(data);
+    new_data->temperature = Poller::instance().bar->getTemperature(data);
+    new_data->altitude = Poller::instance().bar->getAltitude(new_data->pressure)*100;
     new_data->time = localTimeMillis();
-    Poller::instance->dispatch(EVENT_READ_BAROMETER, new_data);
+    Poller::instance().dispatch(EVENT_READ_BAROMETER, new_data);
 }
 
 void Poller::onGyroscopeRead(sensor_data_t* data, error_t error) {
     if (error != SUCCESS) {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_GYROSCOPE));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_GYROSCOPE));
         return;
     }
     gyro_data_t* gyro_data = (gyro_data_t*) data;
     gyro_data->time = localTimeMillis();
-    Poller::instance->dispatch(EVENT_READ_GYROSCOPE, data);
+    Poller::instance().dispatch(EVENT_READ_GYROSCOPE, data);
 }
 
 void Poller::onMagnetometerRead(sensor_data_t* data, error_t error) {
     if (error != SUCCESS) {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_MAGNETOMETER));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_READ, new uint8_t(SENSOR_MAGNETOMETER));
         return;
     }
     mag_data_t* mag_data = (mag_data_t*) data;
     mag_data->time = localTimeMillis();
-    Poller::instance->dispatch(EVENT_READ_MAGNETOMETER, data);
+    Poller::instance().dispatch(EVENT_READ_MAGNETOMETER, data);
 }
 
 void Poller::onGPSStartDone(error_t error) {
     if (error == SUCCESS) {
-        Poller::instance->dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_GPS));
+        Poller::instance().dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_GPS));
     }
     else {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_GPS));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_GPS));
     }
 }
 
 void Poller::onAccelerometerStartDone(error_t error) {
     if (error == SUCCESS) {
-        Poller::instance->dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_ACCELEROMETER));
+        Poller::instance().dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_ACCELEROMETER));
     }
     else {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_ACCELEROMETER));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_ACCELEROMETER));
     }
 }
 
 void Poller::onGyroscopeStartDone(error_t error) {
     if (error == SUCCESS) {
-        Poller::instance->dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_GYROSCOPE));
+        Poller::instance().dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_GYROSCOPE));
     }
     else {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_GYROSCOPE));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_GYROSCOPE));
     }
 }
 
 void Poller::onMagnetometerStartDone(error_t error) {
     if (error == SUCCESS) {
-        Poller::instance->dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_MAGNETOMETER));
+        Poller::instance().dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_MAGNETOMETER));
     }
     else {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_MAGNETOMETER));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_MAGNETOMETER));
     }
 }
 
 void Poller::onBarometerStartDone(error_t error) {
     if (error == SUCCESS) {
-        Poller::instance->dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_BAROMETER));
+        Poller::instance().dispatch(EVENT_SENSOR_INIT, new uint8_t(SENSOR_BAROMETER));
     }
     else {
-        Poller::instance->dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_BAROMETER));
+        Poller::instance().dispatch(EVENT_ERROR_SENSOR_INIT, new uint8_t(SENSOR_BAROMETER));
     }
 }
 
 void Poller::dispatch(Event event, void* data) {
-    this->dispatcher->dispatch(event, data);
+    Dispatcher::instance().dispatch(event, data);
 }
 
 GPS* Poller::getGPS() {

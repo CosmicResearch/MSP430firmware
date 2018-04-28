@@ -28,9 +28,8 @@ class Poller {
 
 private:
 
-    Poller(uint32_t intervalMs, Dispatcher* dispatcher, SensTimer* timer);
-
-    static Poller* instance;
+    Poller(uint32_t intervalMs, SensTimer* timer);
+    Poller(Poller& p) {}
 
     GPS* gps;
     Accelerometer* accel;
@@ -39,7 +38,6 @@ private:
     Barometer* bar;
 
     int32_t interval;
-    Dispatcher* dispatcher;
     SensTimer* timer;
 
     bool started;
@@ -64,7 +62,7 @@ private:
 
 public:
 
-    static Poller* createInstance(Dispatcher* dispatcher, uint32_t intervalMs);
+    static Poller& instance();
 
     error_t start();
     error_t stop();

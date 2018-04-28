@@ -28,7 +28,6 @@ class ApogeeMiddleware : public Middleware {
 private:
 
     bool started;
-    float_t Q_accel, R_altitude;
     SensApogee* apogeeDetection;
 
     gps_data_t* lastGPSData;
@@ -41,7 +40,7 @@ private:
 
 public:
 
-    ApogeeMiddleware(float_t Q_accel, float_t R_altitude);
+    ApogeeMiddleware();
 
     virtual error_t start();
 

@@ -25,8 +25,6 @@ class Dispatcher {
 
 private:
 
-    static Dispatcher* instance;
-
     /**
      * 5 actuators, printers and middleware per event
      */
@@ -37,14 +35,11 @@ private:
 
     process_t processes[MAX_NUMBER_OF_TASKS_PER_DEVICE];
 
-    uint16_t actuators_index[N_MAX_EVENTS];
-    uint16_t printers_index[N_MAX_EVENTS];
-    uint16_t middleware_index[N_MAX_EVENTS];
-
     void markStoppedRunning(uint8_t process_id);
     const process_t getProcessData(uint8_t process_id);
 
     Dispatcher();
+    Dispatcher(Dispatcher& d) {}
 
     bool started;
 
@@ -56,7 +51,7 @@ private:
 
 public:
 
-    static Dispatcher* createInstance();
+    static Dispatcher& instance();
 
     static void reset();
 

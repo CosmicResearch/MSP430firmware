@@ -15,11 +15,9 @@
 
 #include "ApogeeMiddleware.h"
 
-ApogeeMiddleware::ApogeeMiddleware(float_t Q_accel, float_t R_altitude) {
+ApogeeMiddleware::ApogeeMiddleware() {
 
     this->started = false;
-    this->Q_accel = Q_accel;
-    this->R_altitude = R_altitude;
     this->apogeeDetected = false;
     this->gpsValid = false;
     this->accelValid = false;
@@ -113,10 +111,10 @@ void ApogeeMiddleware::execute(Event e, void* data) {
     if (apogee && !this->apogeeDetected) {
         this->apogeeDetected = true;
 
-        Dispatcher::createInstance()->dispatch(EVENT_APOGEE, kalman_data);
+        Dispatcher::instance().dispatch(EVENT_APOGEE, kalman_data);
     }
 
-    Dispatcher::createInstance()->dispatch(EVENT_READ_KALMAN, kalman_data);
+    Dispatcher::instance().dispatch(EVENT_READ_KALMAN, kalman_data);
 
 }
 

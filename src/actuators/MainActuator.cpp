@@ -56,12 +56,11 @@ void MainActuator::actuate(Event event, void* data) {
             if (apogee && kalman_data->altitude <= ALTITUDE_MAIN) {
 
                 bool mainOpen = this->openMain();
-                Dispatcher* dispatcher = Dispatcher::createInstance();
                 if (!mainOpen) {
-                    dispatcher->dispatch(EVENT_ERROR_MAIN, data); // :| the chute probably won't open
+                    Dispatcher::instance().dispatch(EVENT_ERROR_MAIN, data); // :| the chute probably won't open
                 }
                 else {
-                    dispatcher->dispatch(EVENT_MAIN_FIRED, data);
+                    Dispatcher::instance().dispatch(EVENT_MAIN_FIRED, data);
                 }
 
             }
