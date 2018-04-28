@@ -123,9 +123,6 @@ uint32_t eventDataSize(Event e) {
 
 bool packEventData(Event e, void* data, char buff[], size_t& size) {
     bool ret = true;
-#ifdef __DEBUG__
-    Debug.print("Packing data for event ").println((int)e);
-#endif
     buff[0] = (int8_t)e;
     int i = 1;
     switch(e) {
@@ -235,8 +232,8 @@ bool packEventData(Event e, void* data, char buff[], size_t& size) {
         i += sizeof(mag_data.altitude);
         memcpy(&buff[i], &mag_data.velocity, sizeof(mag_data.velocity));
         i += sizeof(mag_data.velocity);
-        memcpy(&buff[i], &mag_data.type, sizeof(mag_data.type));
-        i += sizeof(mag_data.type);
+        buff[i] = (uint8_t)mag_data.type;
+        i += sizeof(uint8_t);
         break;
     }
 
@@ -270,18 +267,11 @@ bool packEventData(Event e, void* data, char buff[], size_t& size) {
 
     default: {
         ret = false;
-        break;s
+        break;
     }
 
 
     }
     size = i;
-#ifdef __DEBUG__
-    Debug.println("inside Pack data");
-    for (int j = 0; j < size; ++j) {
-        Debug.print((int)buff[j]).print(" ");
-    }
-    Debug.println();
-#endif
     return ret;
 }
