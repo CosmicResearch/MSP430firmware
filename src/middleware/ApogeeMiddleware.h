@@ -19,11 +19,8 @@
 
 #include "Bondar.h"
 #include "apogeeDetection.h"
-#include "GPS.h"
-#include "Accelerometer.h"
-#include "Kalman.h"
 
-class ApogeeMiddleware : public Middleware {
+class ApogeeMiddleware : public Listener {
 
 private:
 

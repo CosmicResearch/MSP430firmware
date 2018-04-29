@@ -17,7 +17,6 @@
 #define BONDAR_EVENTS
 
 #include <stdint.h>
-#include "Listener.h"
 #include "Senscape.h"
 #include "GPS.h"
 #include "Accelerometer.h"
@@ -28,23 +27,6 @@
 #include "sensorFusion/SensorFusion.h"
 
 typedef int8_t Event;
-
-
-/**
- * One process is a group of tasks, and process an event and its data through the tasks.
- * Every task is linked to a `Listener`.
- */
-
-struct process_t {
-    Event event;
-    void* data;
-    uint8_t n_running;
-};
-
-struct event_task_t {
-    uint8_t process_id;
-    Listener* listener;
-};
 
 #define N_MAX_EVENTS 64
 #define N_PER_EVENT 5

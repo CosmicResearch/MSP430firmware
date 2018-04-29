@@ -17,9 +17,8 @@
 #define BONDAR_MAIN_ACTUATOR
 
 #include "Bondar.h"
-#include "Kalman.h"
 
-class MainActuator : public Actuator {
+class MainActuator : public Listener {
 
 private:
 
@@ -38,7 +37,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void actuate(Event event, void* data);
+    virtual void execute(Event event, void* data);
 };
 
-#endif /* SRC_ACTUATORS_MAINACTUATOR_H_ */
+#endif

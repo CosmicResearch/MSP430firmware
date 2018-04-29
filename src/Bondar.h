@@ -20,9 +20,8 @@
 
 #include "definitions.h"
 #include "events.h"
-#include "Middleware.h"
-#include "Actuator.h"
-#include "Printer.h"
+#include "Listener.h"
+#include "task.h"
 #include "Dispatcher.h"
 
 

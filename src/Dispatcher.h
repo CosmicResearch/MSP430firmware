@@ -16,10 +16,9 @@
 #ifndef BONDAR_DISPATHCER
 #define BONDAR_DISPATHCER
 
-#include "Actuator.h"
-#include "Printer.h"
-#include "Middleware.h"
+#include "Listener.h"
 #include "events.h"
+#include "task.h"
 
 class Dispatcher {
 
@@ -29,9 +28,7 @@ private:
      * 5 actuators, printers and middleware per event
      */
 
-    Actuator* actuators[N_MAX_EVENTS][N_PER_EVENT];
-    Printer* printers[N_MAX_EVENTS][N_PER_EVENT];
-    Middleware* middleware[N_MAX_EVENTS][N_PER_EVENT];
+    Listener* listeners[N_MAX_EVENTS][N_PER_EVENT];
 
     process_t processes[MAX_NUMBER_OF_TASKS_PER_DEVICE];
 
@@ -43,9 +40,7 @@ private:
 
     bool started;
 
-    static void printerTask(void* eventStruct);
-    static void actuatorTask(void* eventStruct);
-    static void middlewareTask(void* eventStruct);
+    static void listenerTask(void* eventStruct);
 
     uint8_t findFirstEventProcess(boolean_t& found);
 
@@ -61,9 +56,7 @@ public:
      * Events are defined in the events.h file
      */
 
-    void subscribe(Event event, Actuator* actuator);
-    void subscribe(Event event, Printer* printer);
-    void subscribe(Event event, Middleware* middleware);
+    void subscribe(Event event, Listener* actuator);
 
     bool isStarted();
 

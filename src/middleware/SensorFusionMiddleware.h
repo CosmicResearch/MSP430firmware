@@ -19,7 +19,7 @@
 #include "SensorFusion.h"
 #include "Bondar.h"
 
-class SensorFusionMiddleware : public Middleware {
+class SensorFusionMiddleware : public Listener {
 
 public:
 

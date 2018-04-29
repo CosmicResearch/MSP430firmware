@@ -18,9 +18,7 @@
 Dispatcher::Dispatcher() {
     for (int i = 0; i < N_MAX_EVENTS; ++i) {
         for (int j = 0; j < N_PER_EVENT; ++j) {
-            this->actuators[i][j] = NULL;
-            this->printers[i][j] = NULL;
-            this->middleware[i][j] = NULL;
+            this->listeners[i][j] = NULL;
         }
     }
     for (int i = 0; i < MAX_NUMBER_OF_TASKS_PER_DEVICE; ++i) {
@@ -55,14 +53,8 @@ error_t Dispatcher::start() {
 
     for (int i = 0; i < N_MAX_EVENTS; ++i) {
         for (int j = 0; j < N_PER_EVENT; ++j) {
-            if (this->actuators[i][j] != NULL && !this->actuators[i][j]->isStarted()) {
-                this->actuators[i][j]->start();
-            }
-            if (this->printers[i][j] != NULL && !this->printers[i][j]->isStarted()) {
-                this->printers[i][j]->start();
-            }
-            if (this->middleware[i][j] != NULL && !this->middleware[i][j]->isStarted()) {
-                this->middleware[i][j]->start();
+            if (this->listeners[i][j] != NULL && !this->listeners[i][j]->isStarted()) {
+                this->listeners[i][j]->start();
             }
         }
     }
@@ -80,54 +72,20 @@ bool Dispatcher::isStarted() {
  * Subscribe methods for actuators, printers and middleware
  */
 
-void Dispatcher::subscribe(Event event, Actuator* actuator) {
+void Dispatcher::subscribe(Event event, Listener* actuator) {
     if (event < 0 || event >= N_MAX_EVENTS) {
         return;
     }
     int8_t index = -1;
     for (int8_t i = 0; i < N_PER_EVENT; ++i) {
-            if (this->actuators[event][i] == NULL) {
+            if (this->listeners[event][i] == NULL) {
                 index = i;
             }
         }
         if (index < 0 || index >= N_PER_EVENT) {
             return;
         }
-    this->actuators[event][index] = actuator;
-    this->started = false;
-}
-
-void Dispatcher::subscribe(Event event, Printer* printer) {
-    if (event < 0 || event >= N_MAX_EVENTS) {
-        return;
-    }
-    int8_t index = -1;
-    for (int8_t i = 0; i < N_PER_EVENT; ++i) {
-        if (this->printers[event][i] == NULL) {
-            index = i;
-        }
-    }
-    if (index < 0 || index >= N_PER_EVENT) {
-        return;
-    }
-    this->printers[event][index] = printer;
-    this->started = false;
-}
-
-void Dispatcher::subscribe(Event event, Middleware* middleware) {
-    if (event < 0 || event >= N_MAX_EVENTS) {
-        return;
-    }
-    int8_t index = -1;
-    for (int8_t i = 0; i < N_PER_EVENT; ++i) {
-        if (this->middleware[event][i] == NULL) {
-            index = i;
-        }
-    }
-    if (index < 0 || index >= N_PER_EVENT) {
-        return;
-    }
-    this->middleware[event][index] = middleware;
+    this->listeners[event][index] = actuator;
     this->started = false;
 }
 
@@ -168,25 +126,11 @@ void Dispatcher::dispatch(Event event, void* data) {
     processes[process_index].data = data;
 
     for (int i = 0; i < N_PER_EVENT; ++i) {
-        if (this->middleware[event][i] != NULL) {
+        if (this->listeners[event][i] != NULL) {
             event_task_t* eventStruct = new event_task_t;
             eventStruct->process_id = process_index;
-            eventStruct->listener = (Listener*)this->middleware[event][i];
-            postTask(Dispatcher::middlewareTask, eventStruct);
-            ++(processes[process_index].n_running);
-        }
-        if (this->actuators[event][i] != NULL) {
-            event_task_t* eventStruct = new event_task_t;
-            eventStruct->process_id = process_index;
-            eventStruct->listener = (Listener*)this->actuators[event][i];
-            postTask(Dispatcher::actuatorTask, eventStruct);
-            ++(processes[process_index].n_running);
-        }
-        if (this->printers[event][i] != NULL) {
-            event_task_t* eventStruct = new event_task_t;
-            eventStruct->process_id = process_index;
-            eventStruct->listener = (Listener*)this->printers[event][i];
-            postTask(Dispatcher::printerTask, eventStruct);
+            eventStruct->listener = (Listener*)this->listeners[event][i];
+            postTask(Dispatcher::listenerTask, eventStruct);
             ++(processes[process_index].n_running);
         }
     }
@@ -196,26 +140,11 @@ void Dispatcher::dispatch(Event event, void* data) {
  * Dispatch tasks to make execution async
  */
 
-void Dispatcher::printerTask(void* eventStruct) {
-    event_task_t event_data = *((event_task_t*) eventStruct);
-    const process_t process_data = Dispatcher::instance().getProcessData(event_data.process_id);
-    ((Printer*)event_data.listener)->print(process_data.event, process_data.data);
-    Dispatcher::instance().markStoppedRunning(event_data.process_id);
-    delete (event_task_t*)eventStruct;
-}
 
-void Dispatcher::actuatorTask(void* eventStruct) {
+void Dispatcher::listenerTask(void* eventStruct) {
     event_task_t event_data = *((event_task_t*) eventStruct);
     const process_t process_data = Dispatcher::instance().getProcessData(event_data.process_id);
-    ((Actuator*)event_data.listener)->actuate(process_data.event, process_data.data);
-    Dispatcher::instance().markStoppedRunning(event_data.process_id);
-    delete (event_task_t*)eventStruct;
-}
-
-void Dispatcher::middlewareTask(void* eventStruct) {
-    event_task_t event_data = *((event_task_t*) eventStruct);
-    const process_t process_data = Dispatcher::instance().getProcessData(event_data.process_id);
-    ((Middleware*)event_data.listener)->execute(process_data.event, process_data.data);
+    ((Listener*)event_data.listener)->execute(process_data.event, process_data.data);
     Dispatcher::instance().markStoppedRunning(event_data.process_id);
     delete (event_task_t*)eventStruct;
 }

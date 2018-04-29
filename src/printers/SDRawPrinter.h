@@ -23,7 +23,7 @@
 #define LAST_BLOCK      (20000)
 #define BLOCK_SIZE      (512)
 
-class SDRawPrinter : public Printer {
+class SDRawPrinter : public Listener {
 
 private:
 
@@ -55,7 +55,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void print(Event e, void* data);
+    virtual void execute(Event e, void* data);
 
 };
 

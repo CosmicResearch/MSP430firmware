@@ -18,7 +18,7 @@
 
 #include "Bondar.h"
 
-class PilotActuator : public Actuator {
+class PilotActuator : public Listener {
 
 private:
 
@@ -34,7 +34,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void actuate(Event event, void* data);
+    virtual void execute(Event event, void* data);
 
 
 };

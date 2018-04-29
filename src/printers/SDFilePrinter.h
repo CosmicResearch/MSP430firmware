@@ -20,7 +20,7 @@
 #include "SensSDVolume.h"
 #include "SensSDFile.h"
 
-class SDFilePrinter : public Printer {
+class SDFilePrinter : public Listener {
 public:
     SDFilePrinter(SensSDVolume* volume, const char* filename);
 
@@ -30,7 +30,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void print(Event e, void* data);
+    virtual void execute(Event e, void* data);
 private:
     SensSDVolume* volume;
     SensSDFile* file;

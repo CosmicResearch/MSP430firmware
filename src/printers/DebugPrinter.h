@@ -16,10 +16,9 @@
 #ifndef BONDAR_DEBUG_PRINTER
 #define BONDAR_DEBUG_PRINTER
 
-#include "../Printer.h"
-#include "Senscape.h"
+#include "Bondar.h"
 
-class DebugPrinter : public Printer {
+class DebugPrinter : public Listener {
 
 private:
 
@@ -36,7 +35,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void print(Event e, void* data);
+    virtual void execute(Event e, void* data);
 
 };
 

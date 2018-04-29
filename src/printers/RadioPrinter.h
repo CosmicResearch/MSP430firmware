@@ -19,7 +19,7 @@
 #include "Bondar.h"
 #include "SensSX1272.h"
 
-class RadioPrinter : public Printer {
+class RadioPrinter : public Listener {
 
 public:
     RadioPrinter(SensSX1272* radio);
@@ -30,7 +30,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void print(Event e, void* data);
+    virtual void execute(Event e, void* data);
 
 private:
     SensSX1272* radio;

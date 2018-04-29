@@ -40,7 +40,7 @@ bool MainActuator::isStarted() {
     return this->started;
 }
 
-void MainActuator::actuate(Event event, void* data) {
+void MainActuator::execute(Event event, void* data) {
 
     switch(event) {
 

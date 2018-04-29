@@ -16,15 +16,18 @@
 #ifndef BONDAR_LISTENER
 #define BONDAR_LISTENER
 
-#include "Senscape.h"
+#include "events.h"
 
 class Listener {
 
+public:
     virtual error_t start() = 0;
 
     virtual error_t stop() = 0;
 
     virtual bool isStarted() = 0;
+
+    virtual void execute(Event e, void* data);
 
 };
 

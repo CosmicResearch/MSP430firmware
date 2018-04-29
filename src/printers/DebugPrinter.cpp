@@ -43,7 +43,7 @@ bool DebugPrinter::isStarted() {
     return this->started;
 }
 
-void DebugPrinter::print(Event event, void* data) {
+void DebugPrinter::execute(Event event, void* data) {
     Debug.print("Im").println((int)id);
     if (!this->started) {
         return;

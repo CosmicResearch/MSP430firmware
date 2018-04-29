@@ -13,38 +13,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef BONDAR_PRINTER
-#define BONDAR_PRINTER
+#ifndef BONDAR_TASK
+#define BONDAR_TASK
 
-#include "events.h"
-#include "Senscape.h"
+#include "Listener.h"
 
-class Printer : public Listener {
+/**
+ * One process is a group of tasks, and process an event and its data through the tasks.
+ * Every task is linked to a `Listener`.
+ */
 
-    /**
-     * 
-     * Printers print data to the SD card, Serial port or sends it through the radio link.
-     * 
-     */
+struct process_t {
+    Event event;
+    void* data;
+    uint8_t n_running;
+};
 
-public:
-
-    /**
-     * Any *expensive* operation should be done here and not in the constructor
-     * Returns: SUCCESS if it has been started or any error defined in error.h otherwise
-    */
-    virtual error_t start() = 0;
-
-    virtual error_t stop() = 0;
-
-    virtual bool isStarted() = 0;
-
-    /**
-     * event: one of the event codes defined in events.h
-     * data: pointer to data about the event or NULL
-    */ 
-    virtual void print(Event event, void* data) = 0;
-
+struct event_task_t {
+    uint8_t process_id;
+    Listener* listener;
 };
 
 #endif

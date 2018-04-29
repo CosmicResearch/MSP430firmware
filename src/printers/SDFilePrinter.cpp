@@ -38,9 +38,6 @@ error_t SDFilePrinter::start() {
     file->attachOnOpenRootDone(onOpenRootDone);
     file->attachOnOpenDone(onOpenFileDone);
     file->attachOnWriteDone(onWriteFileDone);
-
-    Debug.print("Starting sd... will write on file: ").println(filename);
-
     return volume->initVolume(0);
 }
 
@@ -56,7 +53,6 @@ void SDFilePrinter::onInitDone(error_t result) {
     }
     else {
         instance->starting = false;
-        Debug.print("Init fail").println(result);
     }
 }
 
@@ -66,7 +62,6 @@ void SDFilePrinter::onOpenRootDone(error_t result) {
     }
     else {
         instance->starting = false;
-        Debug.println("open root failed");
     }
 }
 
@@ -79,25 +74,22 @@ void SDFilePrinter::onOpenFileDone(error_t result) {
     }
     else {
         instance->starting = false;
-        Debug.println("open file failed");
     }
 }
 
 void SDFilePrinter::onWriteFileDone(uint16_t lenght, error_t result) {
     instance->writing = false;
     if (result != SUCCESS) {
-        Debug.println("write failed");
     }
 }
 
-void SDFilePrinter::print(Event e, void* data) {
+void SDFilePrinter::execute(Event e, void* data) {
     if (!started || writing) {
         return;
     }
     this->writing = true;
     char buff[50];
     snprintf(buff, sizeof(buff), "Received event %d\n", e);
-    Debug.println(buff);
     file->write(buff, strlen(buff));
 }
 
