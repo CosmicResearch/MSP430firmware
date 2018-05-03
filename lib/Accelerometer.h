@@ -19,6 +19,5 @@
 #include "SensADXL377.h"
 
 typedef SensADXL377 Accelerometer;
-typedef adxl377_data_t accel_data_t;
 
 #endif

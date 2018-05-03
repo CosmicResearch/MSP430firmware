@@ -32,9 +32,6 @@ error_t ApogeeMiddleware::start() {
 
     this->apogeeDetection = new SensApogee(new Altitude_KF(Q_ACCEL, R_ALTITUDE, PROCESS_NOISE), new Kalman(PROCESS_NOISE, SENSOR_NOISE, ESTIMATED_ERROR, INITIAL_VALUE));
 
-    this->lastAccelData = new adxl377_data_t;
-    this->lastGPSData = new gps_data_t;
-
     this->started = true;
 
     return SUCCESS;
@@ -54,54 +51,52 @@ bool ApogeeMiddleware::isStarted() {
     return this->started;
 }
 
-void ApogeeMiddleware::execute(Event e, void* data) {
+void ApogeeMiddleware::execute(Event e, Variant data) {
 
     if (!this->started || this->apogeeDetection == NULL) {
         return;
     }
-
     bool apogee = false;
-    kalman_data_t* kalman_data = new kalman_data_t;
-    kalman_data->time = localTimeMillis();
+    kalman_data_t kalman_data;
+    kalman_data.time = localTimeMillis();
 
     if (e == EVENT_READ_GPS) {
 
-        *(this->lastGPSData) = *((gps_data_t*)data);
+        this->lastGPSData = data.toGPSData();
 
-        if (this->lastGPSData->altitude == -1) { //GPS altitude is not valid
+        if (this->lastGPSData.altitude == -1) { //GPS altitude is not valid
             this->gpsValid = false;
             return;
         }
 
         this->gpsValid = true;
 
-        apogee = this->apogeeDetection->apogeeDetectionSingleKF(this->lastGPSData->altitude);
+        apogee = this->apogeeDetection->apogeeDetectionSingleKF(this->lastGPSData.altitude);
 
-        kalman_data->altitude = this->apogeeDetection->getCorrectedAltitudeSingleKF();
-        kalman_data->type = singleP;
-        kalman_data->velocity = 0.0f;
+        kalman_data.altitude = this->apogeeDetection->getCorrectedAltitudeSingleKF();
+        kalman_data.type = SINGLE;
+        kalman_data.velocity = 0.0f;
 
     }
 
     else if (e == EVENT_READ_ACCELEROMETER) {
 
-        *(this->lastAccelData) = *((adxl377_data_t*)data);
+        this->lastAccelData = data.toAccelData();
         this->accelValid = true;
 
     }
 
     else {
-        delete kalman_data;
         return;
     }
 
     if (this->gpsValid && this->accelValid) {
 
-        apogee = this->apogeeDetection->apogeeDetectionDoubleKF(this->lastGPSData->altitude, this->lastAccelData->_chany, POLL_INTERVAL);
+        apogee = this->apogeeDetection->apogeeDetectionDoubleKF(this->lastGPSData.altitude, this->lastAccelData.y, POLL_INTERVAL);
 
-        kalman_data->altitude = this->apogeeDetection->getCorrectedAltitudeDoubleKF();
-        kalman_data->type = doubleP;
-        kalman_data->velocity = this->apogeeDetection->getVelocityDoubleKF();
+        kalman_data.altitude = this->apogeeDetection->getCorrectedAltitudeDoubleKF();
+        kalman_data.type = DOUBLE;
+        kalman_data.velocity = this->apogeeDetection->getVelocityDoubleKF();
 
         this->gpsValid = false;
         this->accelValid = false;
@@ -111,10 +106,10 @@ void ApogeeMiddleware::execute(Event e, void* data) {
     if (apogee && !this->apogeeDetected) {
         this->apogeeDetected = true;
 
-        Dispatcher::instance().dispatch(EVENT_APOGEE, kalman_data);
+        Dispatcher::instance().dispatch(EVENT_APOGEE, Variant(kalman_data));
     }
 
-    Dispatcher::instance().dispatch(EVENT_READ_KALMAN, kalman_data);
+    Dispatcher::instance().dispatch(EVENT_READ_KALMAN, Variant(kalman_data));
 
 }
 

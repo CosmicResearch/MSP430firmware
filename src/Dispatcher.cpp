@@ -23,7 +23,6 @@ Dispatcher::Dispatcher() {
     }
     for (int i = 0; i < MAX_NUMBER_OF_TASKS_PER_DEVICE; ++i) {
         processes[i].event = 0;
-        processes[i].data = NULL;
         processes[i].n_running = 0;
     }
     this->started = false;
@@ -107,7 +106,7 @@ uint8_t Dispatcher::findFirstEventProcess(boolean_t& found) {
  * Dispatch methods
  */
 
-void Dispatcher::dispatch(Event event, void* data) {
+void Dispatcher::dispatch(Event event, Variant data) {
     if (event < 0 || event >= N_MAX_EVENTS) {
         return;
     }
@@ -153,7 +152,7 @@ void Dispatcher::markStoppedRunning(uint8_t process_id) {
     if (processes[process_id].n_running > 0) {
         --processes[process_id].n_running;
         if (processes[process_id].n_running == 0) {
-            safeDeleteEventData(processes[process_id].event, processes[process_id].data);
+            //safeDeleteEventData(processes[process_id].event, processes[process_id].data);
         }
     }
 }

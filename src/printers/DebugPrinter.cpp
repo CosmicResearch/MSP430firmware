@@ -43,7 +43,7 @@ bool DebugPrinter::isStarted() {
     return this->started;
 }
 
-void DebugPrinter::execute(Event event, void* data) {
+void DebugPrinter::execute(Event event, Variant data) {
     Debug.print("Im").println((int)id);
     if (!this->started) {
         return;
@@ -54,7 +54,7 @@ void DebugPrinter::execute(Event event, void* data) {
 
         case EVENT_READ_GPS: {
             Debug.println("Received GPS data");
-            gps_data_t gps_data = *((gps_data_t*)data);
+            gps_data_t gps_data = data.toGPSData();
             Debug.print("Latitude: ").print(gps_data.latitude/1000000.0f).println(gps_data.latitudeChar);
             Debug.print("Longitude: ").print(gps_data.longitude/1000000.0f).println(gps_data.longitudeChar);
             Debug.print("Altitude: ").print(gps_data.altitude/100.0f).println(" m");
@@ -65,14 +65,14 @@ void DebugPrinter::execute(Event event, void* data) {
         }
         case EVENT_READ_ACCELEROMETER : {
             Debug.println("Received accelerometer data");
-            adxl377_data_t accel_data = *((adxl377_data_t*)data);
-            Debug.print("x: ").print(accel_data._chanx*0.1f*9.80665f).print("m/s^2 y: ").print(accel_data._chany*0.1*9.80665f).print("m/s^2 z: ").print(accel_data._chanz*0.1f*9.80665f).println("m/s^2");
+            accel_data_t accel_data = data.toAccelData();
+            Debug.print("x: ").print(accel_data.x*0.1f*9.80665f).print("m/s^2 y: ").print(accel_data.y*0.1*9.80665f).print("m/s^2 z: ").print(accel_data.z*0.1f*9.80665f).println("m/s^2");
             break;
         }
         case EVENT_READ_GYROSCOPE: {
             Debug.println("Received gyro data");
             int16_t x, y, z;
-            lsm9ds0gyro_data_t data_t = *((lsm9ds0gyro_data_t*) data);
+            gyro_data_t data_t = data.toGyroData();
             x = data_t.x;
             y = data_t.y;
             z = data_t.z;
@@ -84,7 +84,7 @@ void DebugPrinter::execute(Event event, void* data) {
         case EVENT_READ_MAGNETOMETER: {
             Debug.println("Received mag data");
             int16_t xhi, yhi, zhi;
-            lsm9ds0_data_t data_t = *((lsm9ds0_data_t*) data);
+            mag_data_t data_t = data.toMagData();
             xhi = data_t.x;
             yhi = data_t.y;
             zhi = data_t.z;
@@ -96,20 +96,20 @@ void DebugPrinter::execute(Event event, void* data) {
         }
         case EVENT_READ_KALMAN: {
             Debug.println("Received kalman data");
-            kalman_data_t data_t = *((kalman_data_t*) data);
+            kalman_data_t data_t = data.toKalmanData();
             Debug.print("Altitude: ").println(data_t.altitude);
             break;
         }
         case EVENT_SENSOR_INIT: {
-            Debug.print("Init of sensor").println(*((unsigned int*) data));
+            Debug.print("Init of sensor").println((unsigned int)data.toUInt8());
             break;
         }
         case EVENT_ERROR_SENSOR_INIT: {
-            Debug.print("Error at init of sensor").println(*((unsigned int*) data));
+            Debug.print("Error at init of sensor").println((unsigned int)data.toUInt8());
             break;
         }
         case EVENT_ERROR_SENSOR_READ: {
-            Debug.print("Error when reading sensor").println(*((unsigned int*) data));
+            Debug.print("Error when reading sensor").println((unsigned int)data.toUInt8());
             break;
         }
 

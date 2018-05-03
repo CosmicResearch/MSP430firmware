@@ -35,28 +35,28 @@ bool SensorFusionMiddleware::isStarted() {
     return this->started;
 }
 
-void SensorFusionMiddleware::execute(Event event, void* data) {
+void SensorFusionMiddleware::execute(Event event, Variant data) {
     if (event == EVENT_READ_ACCELEROMETER) {
-        this->accelData = *((accel_data_t*)data);
+        this->accelData = data.toAccelData();
         this->accelRead = true;
     }
     else if (event == EVENT_READ_MAGNETOMETER) {
-        this->magData = *((mag_data_t*)data);
+        this->magData = data.toMagData();
         this->magRead = true;
     }
     if (accelRead && magRead) {
 
-        sensfusion_data_t* data = new sensfusion_data_t;
-        data->time = localTimeMillis();
+        sensfusion_data_t data;
+        data.time = localTimeMillis();
 
-        sensorFusion.accelGetOrientation(&accelData, data);
+        sensorFusion.accelGetOrientation(&accelData, &data);
         sensorFusion.magTiltCompensation(SENSOR_AXIS_X, &magData, &accelData);
         sensorFusion.magTiltCompensation(SENSOR_AXIS_Y, &magData, &accelData);
         sensorFusion.magTiltCompensation(SENSOR_AXIS_Z, &magData, &accelData);
 
-        sensorFusion.magGetOrientation(SENSOR_AXIS_X, &magData, data);
+        sensorFusion.magGetOrientation(SENSOR_AXIS_X, &magData, &data);
 
-        Dispatcher::instance().dispatch(EVENT_READ_ORIENTATION, data);
+        Dispatcher::instance().dispatch(EVENT_READ_ORIENTATION, Variant(data));
 
         accelRead = false;
         magRead = false;

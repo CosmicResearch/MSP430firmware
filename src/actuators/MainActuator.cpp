@@ -40,7 +40,7 @@ bool MainActuator::isStarted() {
     return this->started;
 }
 
-void MainActuator::execute(Event event, void* data) {
+void MainActuator::execute(Event event, Variant data) {
 
     switch(event) {
 
@@ -51,9 +51,9 @@ void MainActuator::execute(Event event, void* data) {
 
         case EVENT_READ_KALMAN: {
 
-            kalman_data_t* kalman_data = (kalman_data_t*) data;
+            kalman_data_t kalman_data = data.toKalmanData();
 
-            if (apogee && kalman_data->altitude <= ALTITUDE_MAIN) {
+            if (apogee && kalman_data.altitude <= ALTITUDE_MAIN) {
 
                 bool mainOpen = this->openMain();
                 if (!mainOpen) {

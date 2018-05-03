@@ -25,7 +25,7 @@
 
 struct process_t {
     Event event;
-    void* data;
+    Variant data;
     uint8_t n_running;
 };
 

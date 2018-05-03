@@ -1,4 +1,5 @@
-#include "SensorFusion.h"
+#include <sensorfusion/SensorFusion.h>
+
 #include "math.h"
 
 
@@ -22,18 +23,18 @@ SensFusion::SensFusion(){
 Populates the .pitch/.roll fields in the sensors_vec_t struct
 with the right angular data (in degree)
 */
-boolean_t SensFusion::accelGetOrientation(adxl377_data_t *accel, sensfusion_data_t *data){
+boolean_t SensFusion::accelGetOrientation(accel_data_t *accel, sensfusion_data_t *data){
 	if (accel == NULL) return false;
 	if (data == NULL) return false;
 
 	float_t  t_pitch, t_roll, t_heading;
-    float_t  signOfZ = accel->_chanz >= 0 ? 1.0F : -1.0F;
+    float_t  signOfZ = accel->z >= 0 ? 1.0F : -1.0F;
 
-    t_roll = accel->_chanx * accel->_chanx + accel->_chanz * accel->_chanz;
-  	data->roll = (float_t )atan2(accel->_chany, sqrt(t_roll)) * 180 / PI;
+    t_roll = accel->x * accel->x + accel->z * accel->z;
+  	data->roll = (float_t )atan2(accel->y, sqrt(t_roll)) * 180 / PI;
 
-	t_pitch = accel->_chany * accel->_chany + accel->_chanz * accel->_chanz;
-	data->pitch = (float_t )atan2(accel->_chanx, signOfZ * sqrt(t_pitch)) * 180 / PI;
+	t_pitch = accel->y * accel->y + accel->z * accel->z;
+	data->pitch = (float_t )atan2(accel->x, signOfZ * sqrt(t_pitch)) * 180 / PI;
 
 	return true;
 }
@@ -43,7 +44,7 @@ Utilize the sensor data from an accelerometer to compensate
 the magnetic sensor measurements when the sensor is tilted
 (the pitch and roll angles are not equal 0°)
 */
-boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, adxl377_data_t* accel){
+boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, mag_data_t* mag, accel_data_t* accel){
 	if (mag == NULL) return false;
   	if (accel == NULL) return false;
 
@@ -54,9 +55,9 @@ boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, 
 
 		case SENSOR_AXIS_X:
 		  /* The X-axis is parallel to the gravity */
-		  accel_X = accel->_chany;
-		  accel_Y = accel->_chanz;
-		  accel_Z = accel->_chanx;
+		  accel_X = accel->y;
+		  accel_Y = accel->z;
+		  accel_Z = accel->x;
 		  mag_X = &mag->y;
 		  mag_Y = &mag->z;
 		  mag_Z = &mag->x;
@@ -64,9 +65,9 @@ boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, 
 
 		case SENSOR_AXIS_Y:
 		  /* The Y-axis is parallel to the gravity */
-		  accel_X = accel->_chany;
-		  accel_Y = accel->_chanx;
-		  accel_Z = accel->_chany;
+		  accel_X = accel->y;
+		  accel_Y = accel->x;
+		  accel_Z = accel->y;
 		  mag_X = &(mag->z);
 		  mag_Y = &(mag->x);
 		  mag_Z = &(mag->y);
@@ -74,9 +75,9 @@ boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, 
 
 		case SENSOR_AXIS_Z:
 		  /* The Z-axis is parallel to the gravity */
-		  accel_X = accel->_chanx;
-		  accel_Y = accel->_chany;
-		  accel_Z = accel->_chany;
+		  accel_X = accel->x;
+		  accel_Y = accel->y;
+		  accel_Z = accel->y;
 		  mag_X = &(mag->x);
 		  mag_Y = &(mag->y);
 		  mag_Z = &(mag->z);
@@ -113,7 +114,7 @@ boolean_t SensFusion::magTiltCompensation(sensaxis_t axis, lsm9ds0_data_t* mag, 
 Populates the .heading fields in the sensors_vec_t
 struct with the right angular data (0-359°)
 */
-boolean_t SensFusion::magGetOrientation(sensaxis_t axis, lsm9ds0_data_t* mag, sensfusion_data_t* data){
+boolean_t SensFusion::magGetOrientation(sensaxis_t axis, mag_data_t* mag, sensfusion_data_t* data){
 	/* Make sure the input is valid, not null, etc. */
 	if (mag == NULL) return false;
 	if (data == NULL) return false;
@@ -161,7 +162,7 @@ The orientation of the object can be modeled as resulting from
 3 consecutive rotations in turn: heading (Z-axis), pitch (Y-axis),
 and roll (X-axis) applied to the starting position.
 */
-boolean_t SensFusion::fusionGetOrientation(adxl377_data_t* accel, lsm9ds0_data_t* mag, sensfusion_data_t* data){
+boolean_t SensFusion::fusionGetOrientation(accel_data_t* accel, mag_data_t* mag, sensfusion_data_t* data){
 	/* Make sure the input is valid, not null, etc. */
 	if ( accel  == NULL) return false;
 	if ( mag    == NULL) return false;
@@ -176,7 +177,7 @@ boolean_t SensFusion::fusionGetOrientation(adxl377_data_t* accel, lsm9ds0_data_t
 	/*                    z                                                                           */
 	/*                                                                                                */
 	/* where:  y, z are returned value from accelerometer sensor                                      */
-	data->roll = (float_t) atan2(accel->_chany, accel->_chanz);
+	data->roll = (float_t) atan2(accel->y, accel->z);
 
 	/* pitch: Rotation around the Y-axis. -180 <= roll <= 180                                         */
 	/* a positive pitch angle is defined to be a clockwise rotation about the positive Y-axis         */
@@ -186,10 +187,10 @@ boolean_t SensFusion::fusionGetOrientation(adxl377_data_t* accel, lsm9ds0_data_t
 	/*                    y * sin(roll) + z * cos(roll)                                               */
 	/*                                                                                                */
 	/* where:  x, y, z are returned value from accelerometer sensor                                   */
-	if (accel->_chany * sin(data->roll) + accel->_chanz * cos(data->roll) == 0)
-		data->pitch = accel->_chanx > 0 ? (PI / 2) : (-PI / 2);
+	if (accel->y * sin(data->roll) + accel->z * cos(data->roll) == 0)
+		data->pitch = accel->x > 0 ? (PI / 2) : (-PI / 2);
 	else
-		data->pitch = (float_t) atan(-accel->_chanx / (accel->_chany * sin(data->roll) + accel->_chanz * cos(data->roll)));
+		data->pitch = (float_t) atan(-accel->x / (accel->y * sin(data->roll) + accel->z * cos(data->roll)));
 
 
 	/* heading: Rotation around the Z-axis. -180 <= roll <= 180                                       */

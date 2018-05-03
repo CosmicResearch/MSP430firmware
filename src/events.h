@@ -24,7 +24,8 @@
 #include "Gyroscope.h"
 #include "Magnetometer.h"
 #include "Kalman.h"
-#include "sensorFusion/SensorFusion.h"
+#include "sensorfusion/SensorFusion.h"
+#include "Variant.h"
 
 typedef int8_t Event;
 
@@ -88,23 +89,6 @@ typedef int8_t Event;
 #define SENSOR_BAROMETER 4
 
 /**
- * Deletes the data associated to an Event
- *
- * @param event code
- * @param event data
- */
-void safeDeleteEventData(Event e, void* data);
-
-
-/**
- * Returns the size of the data associated to an Event
- * @param event code
- * @return the size of the data
- */
-uint32_t eventDataSize(Event e);
-
-
-/**
  * Packs the event data to a buffer
  * @param event code
  * @param event data
@@ -112,6 +96,6 @@ uint32_t eventDataSize(Event e);
  * @param here it will return the longitude of the packed data inside the buffer
  * @return if the data could be packed or not
  */
-bool packEventData(Event e, void* data, char buff[], size_t& size);
+bool packEventData(Event e, Variant data, char buff[], size_t& size);
 
 #endif

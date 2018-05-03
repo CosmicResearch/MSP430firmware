@@ -17,8 +17,8 @@
 #define BONDAR_APOGEEMIDDLEWARE
 
 
+#include "../apogee/ApogeeDetection.h"
 #include "Bondar.h"
-#include "apogeeDetection.h"
 
 class ApogeeMiddleware : public Listener {
 
@@ -27,8 +27,8 @@ private:
     bool started;
     SensApogee* apogeeDetection;
 
-    gps_data_t* lastGPSData;
-    adxl377_data_t* lastAccelData;
+    gps_data_t lastGPSData;
+    accel_data_t lastAccelData;
 
     bool apogeeDetected;
 
@@ -45,7 +45,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void execute(Event e, void* data);
+    virtual void execute(Event e, Variant data);
 
 };
 

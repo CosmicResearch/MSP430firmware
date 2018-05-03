@@ -1,7 +1,7 @@
+#include <ApogeeDetection.h>
+#include <SingleKalman.h>
 #include "Senscape.h"
 #include "altitude_kf.h"
-#include "apogeeDetection.h"
-#include "singleKalman.h"
 
 boolean_t SensApogee::_apogee_pending = true;
 uint8_t SensApogee::_altitude_descending_countDF = 3;

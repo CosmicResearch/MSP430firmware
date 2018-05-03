@@ -21,12 +21,4 @@
 
 typedef SensBMP280 Barometer;
 
-struct bmp280_data_comp_t : sensor_data_base_t {
-    float_t pressure;
-    float_t temperature;
-    int32_t altitude;
-};
-
-typedef bmp280_data_comp_t bar_data_t;
-
 #endif

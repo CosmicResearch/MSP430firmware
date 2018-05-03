@@ -24,10 +24,10 @@
 
 PilotActuator pilotActuator = PilotActuator();
 MainActuator mainActuator = MainActuator();
-//ApogeeMiddleware apogeeMiddleware = ApogeeMiddleware();
+ApogeeMiddleware apogeeMiddleware = ApogeeMiddleware();
 //SensorFusionMiddleware sensorFusion = SensorFusionMiddleware();
 
-Resource accelRes = Resource(ARBITER_ADC);
+/*Resource accelRes = Resource(ARBITER_ADC);
 
 SensADC adcx = SensADC(&accelRes,
         ADC_CHANNEL_4,
@@ -55,22 +55,22 @@ SensADC adcz = SensADC(&accelRes,
         SHT_CLOCK_DIV_1,
         SAMPLE_HOLD_4_CYCLES,
         SAMPCON_SOURCE_SMCLK,
-        SAMPCON_CLOCK_DIV_1);
+        SAMPCON_CLOCK_DIV_1);*/
 
-Resource magResource = Resource(ARBITER_USCIB_0);
-Resource gyroResource = Resource(ARBITER_USCIB_0);
-SensTimer timer = SensTimer(TMILLIS);
+//Resource magResource = Resource(ARBITER_USCIB_0);
+//Resource gyroResource = Resource(ARBITER_USCIB_0);
+//SensTimer timer = SensTimer(TMILLIS);
 
-Resource sd_resource = Resource(ARBITER_USCIB_1);
-SensSDVolume VOLUME(&Spi1, &sd_resource);
+//Resource sd_resource = Resource(ARBITER_USCIB_1);
+//SensSDVolume VOLUME(&Spi1, &sd_resource);
 
-SDRawPrinter sdPrinter = SDRawPrinter(&VOLUME);
+//SDRawPrinter sdPrinter = SDRawPrinter(&VOLUME);
 DebugPrinter debugPrinter(1);
 
 GPS gps = GPS(&Serial0, 9600);
-Accelerometer accel = Accelerometer(&adcx, &adcy, &adcz);
-Magnetometer mag = Magnetometer(&Spi0, &magResource, M_SCALE_2GS, M_ODR_125);
-Gyroscope gyro = Gyroscope(&Spi0, &gyroResource, LSM9DS0_GYROSCALE_245DPS, G_ODR_95_BW_125);
+//Accelerometer accel = Accelerometer(&adcx, &adcy, &adcz);
+//Magnetometer mag = Magnetometer(&Spi0, &magResource, M_SCALE_2GS, M_ODR_125);
+//Gyroscope gyro = Gyroscope(&Spi0, &gyroResource, LSM9DS0_GYROSCALE_245DPS, G_ODR_95_BW_125);
 
 void setup(void) {
 
@@ -80,31 +80,31 @@ void setup(void) {
 #endif
 
     Dispatcher::instance().subscribe(EVENT_READ_GPS, &debugPrinter);
-    Dispatcher::instance().subscribe(EVENT_READ_ACCELEROMETER, &debugPrinter);
+    /*Dispatcher::instance().subscribe(EVENT_READ_ACCELEROMETER, &debugPrinter);
     Dispatcher::instance().subscribe(EVENT_READ_GYROSCOPE, &debugPrinter);
-    Dispatcher::instance().subscribe(EVENT_READ_MAGNETOMETER, &debugPrinter);
-    Dispatcher::instance().subscribe(EVENT_READ_KALMAN, &debugPrinter);
+    Dispatcher::instance().subscribe(EVENT_READ_MAGNETOMETER, &debugPrinter);*/
+    Dispatcher::instance().subscribe(EVENT_READ_KALMAN, &debugPrinter);/*
     Dispatcher::instance().subscribe(EVENT_READ_ORIENTATION, &debugPrinter);
     Dispatcher::instance().subscribe(EVENT_APOGEE, &debugPrinter);
     Dispatcher::instance().subscribe(EVENT_MAIN_FIRED, &debugPrinter);
     Dispatcher::instance().subscribe(EVENT_PILOT_FIRED, &debugPrinter);
-    Dispatcher::instance().subscribe(EVENT_LIFTOFF, &debugPrinter);
+    Dispatcher::instance().subscribe(EVENT_LIFTOFF, &debugPrinter);*/
 
 
     Dispatcher::instance().subscribe(EVENT_APOGEE, &pilotActuator);
     Dispatcher::instance().subscribe(EVENT_APOGEE, &mainActuator);
 
-    //Dispatcher::instance().subscribe(EVENT_READ_GPS, &apogeeMiddleware);
-    //Dispatcher::instance().subscribe(EVENT_READ_ACCELEROMETER, &apogeeMiddleware);
+    Dispatcher::instance().subscribe(EVENT_READ_GPS, &apogeeMiddleware);
+    Dispatcher::instance().subscribe(EVENT_READ_ACCELEROMETER, &apogeeMiddleware);
 
     //Dispatcher::instance().subscribe(EVENT_READ_ACCELEROMETER, &sensorFusion);
     //Dispatcher::instance().subscribe(EVENT_READ_MAGNETOMETER, &sensorFusion);
 
     /*TODO: attach sensors to the poller*/
     Poller::instance().attachGPS(&gps); //Baudrate should be 115200 and 10Hz freq
-    Poller::instance().attachAccelerometer(&accel);
-    Poller::instance().attachGyroscope(&gyro);
-    Poller::instance().attachMagnetometer(&mag);
+    //Poller::instance().attachAccelerometer(&accel);
+    //Poller::instance().attachGyroscope(&gyro);
+    //Poller::instance().attachMagnetometer(&mag);
     Poller::instance().start();
 
 #ifdef __DEBUG__

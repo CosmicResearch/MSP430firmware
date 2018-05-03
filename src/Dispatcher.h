@@ -19,6 +19,7 @@
 #include "Listener.h"
 #include "events.h"
 #include "task.h"
+#include "Variant.h"
 
 class Dispatcher {
 
@@ -60,7 +61,7 @@ public:
 
     bool isStarted();
 
-    void dispatch(Event event, void* data);
+    void dispatch(Event event, Variant data);
 
 };
 

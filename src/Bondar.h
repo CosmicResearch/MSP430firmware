@@ -23,6 +23,6 @@
 #include "Listener.h"
 #include "task.h"
 #include "Dispatcher.h"
-
+#include "Variant.h"
 
 #endif

@@ -56,8 +56,6 @@ private:
     static void onGyroscopeStartDone(error_t error);
     static void onBarometerStartDone(error_t error);
 
-    void dispatch(Event event, void* data);
-
     void readSensors();
 
 public:

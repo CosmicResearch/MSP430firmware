@@ -30,7 +30,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void execute(Event e, void* data);
+    virtual void execute(Event e, Variant data);
 
 private:
     SensSX1272* radio;

@@ -16,7 +16,7 @@
 #ifndef BONDAR_ORIENTATIONMIDDLEWARE
 #define BONDAR_ORIENTATIONMIDDLEWARE
 
-#include "SensorFusion.h"
+#include "../sensorfusion/SensorFusion.h"
 #include "Bondar.h"
 
 class SensorFusionMiddleware : public Listener {
@@ -29,7 +29,7 @@ public:
     virtual error_t stop();
     virtual bool isStarted();
 
-    virtual void execute(Event event, void* data);
+    virtual void execute(Event event, Variant data);
 
 private:
 

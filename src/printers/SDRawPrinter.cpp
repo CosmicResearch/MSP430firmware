@@ -56,7 +56,7 @@ error_t SDRawPrinter::stop() {
     return SUCCESS;
 }
 
-void SDRawPrinter::execute(Event e, void* data) {
+void SDRawPrinter::execute(Event e, Variant data) {
     if (!started) {
         return;
     }

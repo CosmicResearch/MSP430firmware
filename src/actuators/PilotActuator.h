@@ -34,7 +34,7 @@ public:
 
     virtual bool isStarted();
 
-    virtual void execute(Event event, void* data);
+    virtual void execute(Event event, Variant data);
 
 
 };

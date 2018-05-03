@@ -19,7 +19,6 @@
 #include "SensLSM9DS0Gyro.h"
 
 typedef SensLSM9DS0Gyro Gyroscope;
-typedef lsm9ds0gyro_data_t gyro_data_t;
 
 
 #endif

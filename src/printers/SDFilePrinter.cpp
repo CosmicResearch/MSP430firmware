@@ -83,7 +83,7 @@ void SDFilePrinter::onWriteFileDone(uint16_t lenght, error_t result) {
     }
 }
 
-void SDFilePrinter::execute(Event e, void* data) {
+void SDFilePrinter::execute(Event e, Variant data) {
     if (!started || writing) {
         return;
     }

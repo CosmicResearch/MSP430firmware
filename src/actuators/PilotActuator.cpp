@@ -46,7 +46,7 @@ bool PilotActuator::isStarted() {
 
 }
 
-void PilotActuator::execute(Event event, void* data) {
+void PilotActuator::execute(Event event, Variant data) {
 
     if (!started) {
         return;

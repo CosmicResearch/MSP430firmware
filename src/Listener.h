@@ -17,6 +17,7 @@
 #define BONDAR_LISTENER
 
 #include "events.h"
+#include "Variant.h"
 
 class Listener {
 
@@ -27,7 +28,7 @@ public:
 
     virtual bool isStarted() = 0;
 
-    virtual void execute(Event e, void* data);
+    virtual void execute(Event e, Variant data);
 
 };
 
