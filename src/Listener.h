@@ -28,7 +28,7 @@ public:
 
     virtual bool isStarted() = 0;
 
-    virtual void execute(Event e, Variant data);
+    virtual void execute(Event e, Variant data) = 0;
 
 };
 

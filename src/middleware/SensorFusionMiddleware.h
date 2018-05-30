@@ -16,7 +16,7 @@
 #ifndef BONDAR_ORIENTATIONMIDDLEWARE
 #define BONDAR_ORIENTATIONMIDDLEWARE
 
-#include "../sensorfusion/SensorFusion.h"
+#include "SensorFusion.h"
 #include "Bondar.h"
 
 class SensorFusionMiddleware : public Listener {

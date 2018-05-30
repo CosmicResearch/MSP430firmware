@@ -140,36 +140,3 @@ void* Variant::toVoidPointer(bool* ok) {
     }
     return NULL;
 }
-
-data_base_t Variant::toDataBase(bool* ok) {
-    if (ok != NULL) {
-        *ok = (this->type != UNKNOWN && this->type != UINT8 && this->type != NONE);
-    }
-    switch (this->type) {
-
-    case GPS_DATA:
-        return this->toGPSData(ok);
-        break;
-    case ACCEL_DATA:
-        return this->toAccelData(ok);
-        break;
-    case GYRO_DATA:
-        return this->toGyroData(ok);
-        break;
-    case MAG_DATA:
-        return this->toMagData(ok);
-        break;
-    case BAR_DATA:
-        return this->toBarData(ok);
-        break;
-    case KALMAN_DATA:
-        return this->toKalmanData(ok);
-        break;
-    case SENSFUSION_DATA:
-        return this->toSensFusionData(ok);
-        break;
-    default:
-        return data_base_t();
-
-    }
-}

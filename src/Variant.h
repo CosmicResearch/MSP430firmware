@@ -54,7 +54,6 @@ public:
     sensfusion_data_t toSensFusionData(bool* ok = NULL);
     uint8_t toUInt8(bool* ok = NULL);
     void* toVoidPointer(bool* ok = NULL);
-    data_base_t toDataBase(bool* ok = NULL);
 
 private:
 

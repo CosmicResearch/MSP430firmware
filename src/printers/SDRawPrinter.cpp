@@ -36,13 +36,13 @@ error_t SDRawPrinter::start() {
     volume->attachOnWriteBlockDone(onWriteBlockDone);
     error_t ret = volume->initCard();
     if (ret==SUCCESS) {
-#ifdef __DEBUG__
+/*#ifdef __DEBUG__
         Debug.println("Initcard success");
-#endif
+#endif*/
         waitingToStart = true;
     }
     else {
-        Debug.println("Initcard fail");
+        //Debug.println("Initcard fail");
     }
     return ret;
 }
@@ -65,7 +65,7 @@ void SDRawPrinter::execute(Event e, Variant data) {
     if (!packEventData(e, data, buff, dataSize)) {
         return; //Data cannot be packed
     }
-#ifdef __DEBUG__
+/*#ifdef __DEBUG__
     Debug.print("Event: ").print(e).print(" size: ").print(dataSize).println("Packed data:");
     for(size_t i = 0; i < dataSize; ++i) {
         Debug.print((int)buff[i]).print(" ");
@@ -75,7 +75,7 @@ void SDRawPrinter::execute(Event e, Variant data) {
         Debug.print(buff[i]).print(" ");
     }
     Debug.println();
-#endif
+#endif*/
     for(size_t i = 0; i < dataSize; ++i) {
         bufferInUse[i+buffPos] = buff[i];
     }
@@ -89,12 +89,12 @@ void SDRawPrinter::execute(Event e, Variant data) {
 }
 
 void SDRawPrinter::writeBlock(uint8_t* buffer) {
-#ifdef __DEBUG__
+/*#ifdef __DEBUG__
     Debug.print("writeBlock ").println(blockNumber);
-#endif
+#endif*/
     buffPos = 0;
     if (writing) {
-        Debug.println("Its writing");
+        //Debug.println("Its writing");
         return;
     }
     uint8_t* bufferToWrite = bufferInUse;
@@ -109,31 +109,31 @@ void SDRawPrinter::writeBlock(uint8_t* buffer) {
 }
 
 void SDRawPrinter::writeBlockTask(void* buffer) {
-#ifdef __DEBUG__
+/*#ifdef __DEBUG__
     Debug.println("writeBlockTask");
-#endif
+#endif*/
     uint8_t* bufferBytes = (uint8_t*) buffer;
     instance->volume->writeBlock(blockNumber, bufferBytes);
 }
 
 void SDRawPrinter::onInitCardDone(error_t result) {
     if (result != SUCCESS) {
-#ifdef __DEBUG__
+/*#ifdef __DEBUG__
         Debug.println("Could not init SD");
-#endif
+#endif*/
         return;
     }
-#ifdef __DEBUG__
+/*#ifdef __DEBUG__
     Debug.println("SD started!");
-#endif
+#endif*/
     started = true;
     waitingToStart = false;
 }
 
 void SDRawPrinter::onWriteBlockDone(error_t result) {
-#ifdef __DEBUG__
+/*#ifdef __DEBUG__
     Debug.print("writeBlockDone").println((result==SUCCESS)?"SUCCESS":"FAIL");
-#endif
+#endif*/
     writing = false;
     blockNumber++;
     if (blockNumber > LAST_BLOCK) {
